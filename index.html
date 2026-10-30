@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Mono:wght@500&display=swap">
 <style>
 /* Layout: tutto lo schermo è la zona di gioco. In alto i punteggi, sotto una griglia che occupa lo spazio libero.
-   Si controlla con lo swipe o col joystick flottante che nasce sotto il dito, ovunque. Il pad a quattro zone è facoltativo. */
+   Si controlla toccando la parte dello schermo dove vuoi andare, oppure con lo swipe. Il pad a quattro zone è facoltativo. */
 :root {
   --bg: #E6ECF0;
   --board: #F8FAFB;
@@ -34,6 +34,7 @@
   --slow: #14949B;
   --cut: #D9467A;
   --obst: #9FB0BD;
+  --monster: #C8432B;
   --btn: #FFFFFF;
   --zone: #D3DEE6;
   --overlay: rgba(230, 236, 240, 0.92);
@@ -57,6 +58,7 @@
     --slow: #4FD1D5;
     --cut: #FF7FA8;
     --obst: #3B4D5C;
+    --monster: #FF7A5C;
     --btn: #1B2833;
     --zone: #2C4152;
     --overlay: rgba(14, 21, 28, 0.92);
@@ -78,6 +80,7 @@
   --slow: #4FD1D5;
   --cut: #FF7FA8;
   --obst: #3B4D5C;
+  --monster: #FF7A5C;
   --btn: #1B2833;
   --zone: #2C4152;
   --overlay: rgba(14, 21, 28, 0.92);
@@ -109,16 +112,16 @@ body {
   flex-direction: column;
   gap: 10px;
 }
-header { flex: none; display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+header { flex: none; display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; }
 h1 {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 2rem;
+  font-size: 1.75rem;
   line-height: 1;
   letter-spacing: -0.02em;
   margin: 0;
 }
-.stats { display: flex; gap: 16px; }
+.stats { display: flex; gap: 12px; margin-left: auto; }
 .stat { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
 .stat span { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .stat b {
@@ -193,48 +196,21 @@ canvas { display: block; width: 100%; height: 100%; }
 .btn:active:not(:disabled) { transform: translateY(1px); }
 
 .pausebtn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 3;
-  width: 38px;
-  height: 38px;
+  flex: none;
+  width: 40px;
+  height: 40px;
   padding: 0;
   display: grid;
   place-items: center;
   border-radius: 50%;
   border: 1px solid var(--line);
-  background: color-mix(in srgb, var(--btn) 82%, transparent);
+  background: var(--btn);
   color: var(--ink);
   cursor: pointer;
   touch-action: manipulation;
 }
+.pausebtn:disabled { opacity: 0.35; cursor: default; }
 .pausebtn svg { width: 16px; height: 16px; }
-
-/* Joystick flottante: compare sotto il dito, ovunque sullo schermo */
-.stick {
-  position: fixed;
-  z-index: 20;
-  width: 112px;
-  height: 112px;
-  margin: -56px 0 0 -56px;
-  border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--snake) 45%, transparent);
-  background: color-mix(in srgb, var(--snake) 12%, transparent);
-  pointer-events: none;
-}
-.knob {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 46px;
-  height: 46px;
-  margin: -23px 0 0 -23px;
-  border-radius: 50%;
-  background: var(--snake);
-  opacity: 0.85;
-  box-shadow: 0 4px 12px rgba(10, 25, 40, 0.25);
-}
 
 /* Pad a quattro zone: solo su richiesta (pulsante "Pad" nella schermata di pausa) */
 .pad {
@@ -283,14 +259,14 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       <div class="stat"><span>Punti</span><b id="score">0</b></div>
       <div class="stat"><span>Record</span><b id="best">0</b></div>
     </div>
+    <button class="pausebtn" id="pauseBtn" type="button" aria-label="Pausa" disabled>
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="3" y="2" width="3.4" height="12" rx="1"/><rect x="9.6" y="2" width="3.4" height="12" rx="1"/></svg>
+    </button>
   </header>
 
   <div class="stage" id="stage">
     <div class="board" id="board" aria-label="Griglia di gioco">
       <canvas id="cv"></canvas>
-      <button class="pausebtn" id="pauseBtn" type="button" aria-label="Pausa" hidden>
-        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="3" y="2" width="3.4" height="12" rx="1"/><rect x="9.6" y="2" width="3.4" height="12" rx="1"/></svg>
-      </button>
       <div class="overlay" id="overlay">
         <p class="ov-title" id="ovTitle">Pronto?</p>
         <p class="ov-sub" id="ovSub">Tocca lo schermo per iniziare</p>
@@ -299,6 +275,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
           <span><i style="background:var(--bonus)"></i>Stella +50</span>
           <span><i style="background:var(--slow)"></i>Rallenta</span>
           <span><i style="background:var(--cut)"></i>Accorcia</span>
+          <span><i style="background:var(--monster)"></i>Mostri dal livello 5</span>
         </div>
         <div class="ov-tools">
           <button class="btn" id="wrapBtn" type="button">Bordi: muri</button>
@@ -327,8 +304,6 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   </div>
 </main>
 
-<div class="stick" id="stick" hidden><div class="knob" id="knob"></div></div>
-
 <script>
 (function () {
   'use strict';
@@ -336,11 +311,10 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   var MIN_ROWS = 16, MAX_ROWS = 40;
   var FOODS_PER_LEVEL = 5;
   var $ = function (id) { return document.getElementById(id); };
-  var board = $('board'), canvas = $('cv'), ctx = canvas.getContext('2d');
+  var board = $('board'), canvas = $('cv'), ctx = canvas.getContext('2d', { alpha: false });
   var scoreEl = $('score'), bestEl = $('best'), levelEl = $('level');
   var overlay = $('overlay'), ovTitle = $('ovTitle'), ovSub = $('ovSub');
   var pauseBtn = $('pauseBtn'), wrapBtn = $('wrapBtn'), soundBtn = $('soundBtn'), padBtn = $('padBtn'), fsBtn = $('fsBtn');
-  var stick = $('stick'), knob = $('knob');
   var rootEl = document.documentElement;
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -369,7 +343,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   var C = {};
   function loadColors() {
     var cs = getComputedStyle(document.documentElement);
-    ['board', 'grid', 'snake', 'snake-head', 'food', 'danger', 'bonus', 'slow', 'cut', 'obst', 'ink', 'muted'].forEach(function (n) {
+    ['board', 'grid', 'snake', 'snake-head', 'food', 'danger', 'bonus', 'slow', 'cut', 'obst', 'monster', 'ink', 'muted'].forEach(function (n) {
       C[n] = cs.getPropertyValue('--' + n).trim();
     });
   }
@@ -412,7 +386,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     slow: function () { tone(720, 220, 0.4, 'sine', 0.13); },
     cut: function () { tone(520, 170, 0.2, 'triangle', 0.13); },
     level: function () { tone(523, 0, 0.12, 'sine', 0.12); tone(659, 0, 0.12, 'sine', 0.12, 0.11); tone(784, 0, 0.2, 'sine', 0.12, 0.22); },
-    die: function () { tone(300, 60, 0.45, 'sawtooth', 0.09); }
+    die: function () { tone(300, 60, 0.45, 'sawtooth', 0.09); },
+    spawn: function () { tone(200, 110, 0.3, 'square', 0.05); }
   };
   function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }
 
@@ -421,9 +396,10 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   var snake, prevSnake, dir, queue, food, special, obstacles;
   var score = 0, best = 0, level = 1, eaten = 0;
   var state = 'ready'; // ready | running | paused | over
-  var acc = 0, alpha = 1, gt = 0, overAt = 0, crashed = false, won = false, wrap = false, padOn = false;
-  var slowUntil = 0, bannerAt = -9999, bannerText = '', shakeUntil = 0;
-  var particles = [];
+  var prog = 0, alpha = 1, slowF = 1, mProg = 0, powerUntil = 0, gt = 0, overAt = 0, crashed = false, won = false, wrap = false, padOn = false;
+  var slowUntil = 0, bannerAt = -9999, bannerText = '', bannerSub = '', shakeUntil = 0;
+  var particles = [], monsters = [], respawns = [];
+  var MONSTER_SLOW = 1.9, MAX_MONSTERS = 3;
 
   try {
     best = parseInt(localStorage.getItem('snake.best') || '0', 10) || 0;
@@ -433,7 +409,6 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   } catch (e) {}
 
   function baseTick() { return Math.max(72, 150 - (level - 1) * 9); }
-  function curTick() { return baseTick() * (slowUntil > gt ? 1.65 : 1); }
 
   /* ---------- Griglia a misura di schermo ---------- */
   function computeGrid() {
@@ -489,6 +464,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     var i;
     for (i = 0; i < snake.length; i++) if (snake[i].x === x && snake[i].y === y) return true;
     for (i = 0; i < obstacles.length; i++) if (obstacles[i].x === x && obstacles[i].y === y) return true;
+    for (i = 0; i < monsters.length; i++) if (monsters[i].x === x && monsters[i].y === y) return true;
     if (food && food.x === x && food.y === y) return true;
     if (special && special.x === x && special.y === y) return true;
     return false;
@@ -544,13 +520,19 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     obstacles = [];
     special = null;
     particles = [];
+    monsters = [];
+    respawns = [];
     score = 0;
     level = 1;
     eaten = 0;
-    acc = 0;
+    prog = 0;
+    mProg = 0;
     alpha = 1;
+    slowF = 1;
     gt = 0;
     slowUntil = 0;
+    powerUntil = 0;
+    bannerSub = '';
     bannerAt = -9999;
     shakeUntil = 0;
     crashed = false;
@@ -563,7 +545,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   function start() {
     audio();
     state = 'running';
-    acc = 0;
+    prog = 0;
     refreshUI();
   }
   function pause() {
@@ -635,9 +617,125 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   function levelUp() {
     level++;
     bannerText = 'Livello ' + level;
+    bannerSub = level === 5 ? 'Arrivano i mostri!' : '';
     bannerAt = performance.now();
     SFX.level();
     if (level >= 2) addObstacles(2);
+    syncMonsters();
+  }
+
+  /* ---------- Mostri: dal livello 5 ti cercano; con la stella puoi mangiarli ---------- */
+  function monsterActive(m) { return gt - m.born >= 900; }
+  function monsterAt(x, y) {
+    for (var i = 0; i < monsters.length; i++) {
+      if (monsters[i].x === x && monsters[i].y === y && monsterActive(monsters[i])) return i;
+    }
+    return -1;
+  }
+  function spawnMonster() {
+    var h = snake[0];
+    var c = pick(freeCells(function (x, y) { return Math.abs(x - h.x) + Math.abs(y - h.y) >= 10; }));
+    if (!c) return false;
+    monsters.push({ x: c.x, y: c.y, px: c.x, py: c.y, born: gt });
+    SFX.spawn();
+    return true;
+  }
+  function syncMonsters() {
+    var want = level >= 5 ? Math.min(MAX_MONSTERS, 1 + Math.floor((level - 5) / 2)) : 0;
+    while (monsters.length + respawns.length < want) { if (!spawnMonster()) break; }
+  }
+  function respawnTick() {
+    for (var i = respawns.length - 1; i >= 0; i--) {
+      if (respawns[i] <= gt) { respawns.splice(i, 1); if (!spawnMonster()) respawns.push(gt + 2000); }
+    }
+  }
+  function eatMonster(i) {
+    var m = monsters[i];
+    monsters.splice(i, 1);
+    respawns.push(gt + 5000);
+    score += 100;
+    burst(m.x + 0.5, m.y + 0.5, C.monster, 16, 0.0075);
+    floatText(m.x + 0.5, m.y + 0.2, '+100', C.monster);
+    SFX.bonus();
+    buzz(20);
+    refreshUI();
+  }
+  var DIRS4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  function nbrs(x, y) {
+    var out = [];
+    for (var i = 0; i < 4; i++) {
+      var nx = x + DIRS4[i][0], ny = y + DIRS4[i][1];
+      if (wrap) { nx = (nx + COLS) % COLS; ny = (ny + ROWS) % ROWS; }
+      else if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) continue;
+      out.push({ x: nx, y: ny });
+    }
+    return out;
+  }
+  function blockedMap(self) {
+    var b = new Uint8Array(COLS * ROWS), i;
+    for (i = 0; i < obstacles.length; i++) b[obstacles[i].y * COLS + obstacles[i].x] = 1;
+    for (i = 1; i < snake.length; i++) b[snake[i].y * COLS + snake[i].x] = 1;
+    for (i = 0; i < monsters.length; i++) if (monsters[i] !== self) b[monsters[i].y * COLS + monsters[i].x] = 1;
+    return b;
+  }
+  function distHead(x, y) { var h = snake[0]; return Math.abs(x - h.x) + Math.abs(y - h.y); }
+  function freeNbrs(m, b) {
+    return nbrs(m.x, m.y).filter(function (n) { return !b[n.y * COLS + n.x] && !(n.x === snake[0].x && n.y === snake[0].y && false); });
+  }
+  function randomStep(m) { return pick(freeNbrs(m, blockedMap(m))); }
+  function fleeStep(m) {
+    var ns = freeNbrs(m, blockedMap(m)), best = null, bd = -1;
+    for (var i = 0; i < ns.length; i++) {
+      var d = distHead(ns[i].x, ns[i].y) + Math.random() * 0.5;
+      if (d > bd) { bd = d; best = ns[i]; }
+    }
+    return best;
+  }
+  function chaseStep(m) {
+    var h = snake[0], b = blockedMap(m), n = COLS * ROWS;
+    var start = m.y * COLS + m.x, goal = h.y * COLS + h.x;
+    if (start === goal) return null;
+    var prev = new Int32Array(n).fill(-1), seen = new Uint8Array(n), q = [start], found = false;
+    seen[start] = 1;
+    for (var qi = 0; qi < q.length; qi++) {
+      var cur = q[qi];
+      if (cur === goal) { found = true; break; }
+      var cx = cur % COLS, cy = (cur - cx) / COLS, ns = nbrs(cx, cy);
+      for (var k = 0; k < ns.length; k++) {
+        var id = ns[k].y * COLS + ns[k].x;
+        if (seen[id] || (b[id] && id !== goal)) continue;
+        seen[id] = 1;
+        prev[id] = cur;
+        q.push(id);
+      }
+    }
+    if (found) {
+      var s2 = goal;
+      while (prev[s2] !== start && prev[s2] !== -1) s2 = prev[s2];
+      return { x: s2 % COLS, y: Math.floor(s2 / COLS) };
+    }
+    // nessuna strada libera: si avvicina come può
+    var fn = freeNbrs(m, b), best = null, bd = 1e9;
+    for (var i = 0; i < fn.length; i++) {
+      var d = distHead(fn[i].x, fn[i].y);
+      if (d < bd) { bd = d; best = fn[i]; }
+    }
+    return best;
+  }
+  function monstersStep() {
+    var h = snake[0], scared = powerUntil > gt;
+    for (var i = monsters.length - 1; i >= 0; i--) {
+      var m = monsters[i];
+      m.px = m.x;
+      m.py = m.y;
+      if (!monsterActive(m)) continue;
+      var nx = scared ? fleeStep(m) : (Math.random() < 0.12 ? randomStep(m) : chaseStep(m));
+      if (nx) { m.x = nx.x; m.y = nx.y; }
+      if (m.x === h.x && m.y === h.y) {
+        if (scared) eatMonster(i);
+        else { gameOver(false); return; }
+      }
+    }
   }
 
   function step() {
@@ -653,6 +751,11 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     var i;
     for (i = 0; i < obstacles.length; i++) {
       if (obstacles[i].x === hx && obstacles[i].y === hy) { gameOver(false); return; }
+    }
+    var mi = monsterAt(hx, hy);
+    if (mi >= 0) {
+      if (powerUntil > gt) eatMonster(mi);
+      else { gameOver(false); return; }
     }
     var eatingFood = food && hx === food.x && hy === food.y;
     var eatingSpecial = special && hx === special.x && hy === special.y;
@@ -671,6 +774,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       special = null;
       if (sp.type === 'gold') {
         score += 50;
+        powerUntil = gt + 5000;
         burst(hx + 0.5, hy + 0.5, C.bonus, 16, 0.0075);
         floatText(hx + 0.5, hy + 0.2, '+50', C.bonus);
         SFX.bonus();
@@ -712,7 +816,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     scoreEl.textContent = score;
     bestEl.textContent = Math.max(best, score);
     levelEl.textContent = level;
-    pauseBtn.hidden = state !== 'running';
+    pauseBtn.disabled = state !== 'running';
     var idle = state === 'ready' || state === 'over';
     wrapBtn.disabled = !idle;
     padBtn.disabled = !idle;
@@ -722,7 +826,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     overlay.hidden = state === 'running';
     if (state === 'ready') {
       ovTitle.textContent = 'Pronto?';
-      ovSub.textContent = 'Tocca lo schermo per iniziare, poi scorri o trascina col pollice';
+      ovSub.textContent = 'Tocca lo schermo per iniziare. Tocca dove vuoi andare, o scorri il dito';
     } else if (state === 'paused') {
       ovTitle.textContent = 'In pausa';
       ovSub.textContent = 'Tocca lo schermo per riprendere';
@@ -816,6 +920,57 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     }
   }
 
+  function drawMonster(m, c, t) {
+    var a = Math.min(1, mProg), x, y;
+    if (Math.abs(m.x - m.px) > 1.5 || Math.abs(m.y - m.py) > 1.5) { x = a < 0.5 ? m.px : m.x; y = a < 0.5 ? m.py : m.y; }
+    else { x = m.px + (m.x - m.px) * a; y = m.py + (m.y - m.py) * a; }
+    var cx = x * c + c / 2, cy = y * c + c / 2, age = gt - m.born;
+    var scared = powerUntil > gt, blink = scared && powerUntil - gt < 1500 && Math.floor(t / 140) % 2 === 0;
+    var arriving = age < 900;
+    if (arriving) {
+      ctx.strokeStyle = C.monster;
+      ctx.lineWidth = Math.max(1.5, c * 0.07);
+      ctx.globalAlpha = 0.7;
+      ctx.beginPath();
+      ctx.arc(cx, cy, c * (0.95 - 0.5 * age / 900), 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = 0.45;
+    }
+    ctx.fillStyle = scared ? (blink ? 'rgba(79,209,213,0.35)' : C.slow) : C.monster;
+    rr(cx - c * 0.36, cy - c * 0.3, c * 0.72, c * 0.68, c * 0.3);
+    ctx.fill();
+    ctx.beginPath();                       // corna
+    ctx.moveTo(cx - c * 0.3, cy - c * 0.22); ctx.lineTo(cx - c * 0.2, cy - c * 0.46); ctx.lineTo(cx - c * 0.07, cy - c * 0.28);
+    ctx.moveTo(cx + c * 0.3, cy - c * 0.22); ctx.lineTo(cx + c * 0.2, cy - c * 0.46); ctx.lineTo(cx + c * 0.07, cy - c * 0.28);
+    ctx.fill();
+    var h = snake[0], ex = h.x - m.x, ey = h.y - m.y, el = Math.hypot(ex, ey) || 1;
+    var lx = scared ? 0 : ex / el * c * 0.04, ly = scared ? 0 : ey / el * c * 0.04;
+    for (var k = -1; k <= 1; k += 2) {
+      ctx.fillStyle = C.board;
+      ctx.beginPath();
+      ctx.arc(cx + k * c * 0.15, cy - c * 0.04, c * 0.1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = C.ink;
+      ctx.beginPath();
+      ctx.arc(cx + k * c * 0.15 + lx, cy - c * 0.04 + ly, c * 0.05, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawPill(label, color, row) {
+    var c = cell, y0 = c * 0.4 + row * c * 1.05;
+    ctx.font = '700 ' + Math.round(c * 0.5) + 'px system-ui, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    var tw = ctx.measureText(label).width + c * 0.7;
+    ctx.fillStyle = color;
+    rr(c * 0.4, y0, tw, c * 0.85, c * 0.42);
+    ctx.fill();
+    ctx.fillStyle = C.board;
+    ctx.fillText(label, c * 0.4 + c * 0.35, y0 + c * 0.45);
+  }
+
   function draw(t) {
     var c = cell, i, j;
     var a = state === 'over' ? 1 : alpha;
@@ -850,6 +1005,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       ctx.fill();
     }
     drawSpecial(t, c);
+    for (j = 0; j < monsters.length; j++) drawMonster(monsters[j], c, t);
 
     // serpente: un unico tratto curvo; ombra con un semplice scarto (niente sfocature costose)
     var pts = [];
@@ -880,6 +1036,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       var vx = hp.x - pts[1].x, vy = hp.y - pts[1].y, vl = Math.hypot(vx, vy);
       if (vl > c * 0.05 && vl < c * 1.5) { fdx = vx / vl; fdy = vy / vl; }
     }
+    headX = hp.x;
+    headY = hp.y;
     ctx.fillStyle = crashed ? C.danger : C['snake-head'];
     ctx.beginPath();
     ctx.arc(hp.x, hp.y, c * 0.42, 0, Math.PI * 2);
@@ -917,19 +1075,10 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     }
     ctx.globalAlpha = 1;
 
-    // effetto attivo
-    if (slowUntil > gt && state !== 'ready') {
-      var label = 'Rallentato ' + Math.ceil((slowUntil - gt) / 1000) + 's';
-      ctx.font = '700 ' + Math.round(c * 0.5) + 'px system-ui, sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      var tw = ctx.measureText(label).width + c * 0.7;
-      ctx.fillStyle = C.slow;
-      rr(c * 0.4, c * 0.4, tw, c * 0.85, c * 0.42);
-      ctx.fill();
-      ctx.fillStyle = C.board;
-      ctx.fillText(label, c * 0.4 + c * 0.35, c * 0.4 + c * 0.45);
-    }
+    // effetti attivi
+    var row = 0;
+    if (slowUntil > gt && state !== 'ready') drawPill('Rallentato ' + Math.ceil((slowUntil - gt) / 1000) + 's', C.slow, row++);
+    if (powerUntil > gt && state !== 'ready') drawPill('Potere ' + Math.ceil((powerUntil - gt) / 1000) + 's', C.bonus, row++);
 
     // banner di livello
     var bt = t - bannerAt;
@@ -945,6 +1094,13 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       ctx.strokeText(bannerText, BW / 2, BH * 0.3);
       ctx.fillStyle = C.ink;
       ctx.fillText(bannerText, BW / 2, BH * 0.3);
+      if (bannerSub) {
+        ctx.font = '700 ' + Math.round(c * 0.6) + 'px system-ui, sans-serif';
+        ctx.lineWidth = c * 0.3;
+        ctx.strokeText(bannerSub, BW / 2, BH * 0.3 + c * 1.3);
+        ctx.fillStyle = C.monster;
+        ctx.fillText(bannerSub, BW / 2, BH * 0.3 + c * 1.3);
+      }
       ctx.globalAlpha = 1;
     }
   }
@@ -955,15 +1111,19 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     lastFrame = t;
     if (state === 'running') {
       gt += dt;
-      acc += dt;
-      if (acc > 500) acc = 500;
-      var tm = curTick();
-      while (acc >= tm && state === 'running') {
-        step();
-        acc -= tm;
-        tm = curTick();
+      // la velocità cambia in modo dolce, e l'avanzamento è un numero continuo: niente scatti quando cambia livello o effetto
+      slowF += ((slowUntil > gt ? 1.65 : 1) - slowF) * Math.min(1, dt / 200);
+      var tm = baseTick() * slowF;
+      prog += dt / tm;
+      if (prog > 3) prog = 3;
+      while (prog >= 1 && state === 'running') { step(); prog -= 1; }
+      alpha = Math.min(1, prog);
+      if (monsters.length || respawns.length) {
+        mProg += dt / (tm * MONSTER_SLOW);
+        if (mProg > 3) mProg = 3;
+        while (mProg >= 1 && state === 'running') { monstersStep(); mProg -= 1; }
+        respawnTick();
       }
-      alpha = Math.min(1, acc / curTick());
       if (special && gt - special.born > special.life) special = null;
     }
     if (state !== 'paused') {
@@ -981,40 +1141,57 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     requestAnimationFrame(frame);
   }
 
-  /* ---------- Comandi su tutto lo schermo: swipe e joystick flottante ---------- */
-  var STICK_R = 38, DEAD = 10;
-  var fAct = false, ax = 0, ay = 0, fx0 = 0, fy0 = 0, fMoved = false, fDir = '';
+  /* ---------- Comandi su tutto lo schermo ---------- */
+  // Tocco: lo snake va verso la parte dello schermo toccata, rispetto alla testa.
+  // Swipe: scorri il dito nella direzione voluta. Niente viene disegnato a schermo.
+  var FOLLOW_R = 38, DEAD = 12, HOLD_MS = 110;
+  var fAct = false, ax = 0, ay = 0, fx0 = 0, fy0 = 0, fMoved = false, fDir = '', steered = false, holdT = 0;
+  var headX = 0, headY = 0;
   function isUI(el) { return el && el.closest && el.closest('button, .pad'); }
+  function sgn(v, fallback) { return v > 0 ? 1 : (v < 0 ? -1 : fallback); }
+
+  function touchSteer(cx, cy) {
+    var r = board.getBoundingClientRect();
+    var dx = cx - (r.left + headX), dy = cy - (r.top + headY);
+    if (Math.hypot(dx, dy) < cell * 0.5) return;
+    var cur = queue.length ? queue[queue.length - 1] : dir;
+    var horiz = Math.abs(dx) >= Math.abs(dy);
+    var nx = horiz ? sgn(dx, 1) : 0, ny = horiz ? 0 : sgn(dy, 1);
+    if (nx === -cur.x && ny === -cur.y) {        // tocco dietro la testa: svolta di lato, verso il tocco
+      if (horiz) { nx = 0; ny = sgn(dy, headY < BH / 2 ? 1 : -1); }
+      else { ny = 0; nx = sgn(dx, headX < BW / 2 ? 1 : -1); }
+    }
+    setDir(nx, ny);
+  }
 
   document.addEventListener('pointerdown', function (e) {
     if (isUI(e.target)) return;
     e.preventDefault();
     fAct = true;
     fMoved = false;
+    steered = false;
     fDir = '';
     ax = fx0 = e.clientX;
     ay = fy0 = e.clientY;
-    stick.style.left = ax + 'px';
-    stick.style.top = ay + 'px';
-    knob.style.transform = 'translate(0px, 0px)';
-    stick.hidden = false;
+    clearTimeout(holdT);
+    holdT = setTimeout(function () {             // dito appoggiato: si sterza subito, senza aspettare che lo alzi
+      if (fAct && !fMoved && (state === 'running' || state === 'ready')) { steered = true; touchSteer(fx0, fy0); }
+    }, HOLD_MS);
     try { document.body.setPointerCapture(e.pointerId); } catch (err) {}
   });
   document.addEventListener('pointermove', function (e) {
     if (!fAct) return;
     var dx = e.clientX - ax, dy = e.clientY - ay, len = Math.hypot(dx, dy);
-    if (len > STICK_R) {                       // il cerchio segue il dito: i cambi di direzione restano immediati
-      var k = (len - STICK_R) / len;
+    if (len > FOLLOW_R) {                        // il punto di partenza segue il dito: i cambi di direzione restano immediati
+      var k = (len - FOLLOW_R) / len;
       ax += dx * k;
       ay += dy * k;
       dx = e.clientX - ax;
       dy = e.clientY - ay;
       len = Math.hypot(dx, dy);
-      stick.style.left = ax + 'px';
-      stick.style.top = ay + 'px';
     }
-    knob.style.transform = 'translate(' + (dx * 0.7).toFixed(1) + 'px, ' + (dy * 0.7).toFixed(1) + 'px)';
     if (len < DEAD) return;
+    clearTimeout(holdT);
     var d = '';
     if (Math.abs(dx) > Math.abs(dy) * 1.15) d = dx > 0 ? 'r' : 'l';
     else if (Math.abs(dy) > Math.abs(dx) * 1.15) d = dy > 0 ? 'd' : 'u';
@@ -1022,14 +1199,16 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       fDir = d;
       fMoved = true;
       setDir(d === 'r' ? 1 : (d === 'l' ? -1 : 0), d === 'd' ? 1 : (d === 'u' ? -1 : 0));
-      buzz(6);
     }
   });
   function endGesture(e) {
     if (!fAct) return;
     fAct = false;
-    stick.hidden = true;
-    if (e.type === 'pointerup' && !fMoved && Math.hypot(e.clientX - fx0, e.clientY - fy0) < 10) primary();
+    clearTimeout(holdT);
+    if (e.type === 'pointerup' && !fMoved && !steered && Math.hypot(e.clientX - fx0, e.clientY - fy0) < 10) {
+      if (state === 'paused' || state === 'over') primary();
+      else touchSteer(e.clientX, e.clientY);
+    }
   }
   document.addEventListener('pointerup', endGesture);
   document.addEventListener('pointercancel', endGesture);
@@ -1056,7 +1235,6 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     padZone = z;
     lightZone(z);
     setDir(DIRS[z][0], DIRS[z][1]);
-    buzz(6);
   }
   function endPad() {
     padActive = false;
@@ -1133,11 +1311,15 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   // Aggancio per i test automatici (attivo solo con #test nell'indirizzo)
   if (location.hash === '#test') {
     window.__snake = {
-      get: function () { return { state: state, score: score, level: level, eaten: eaten, len: snake.length, head: snake[0], dir: dir, special: special, obstacles: obstacles.length, food: food, slow: slowUntil > gt, cols: COLS, rows: ROWS, cell: cell, drawMs: drawMs }; },
+      get: function () { return { state: state, score: score, level: level, eaten: eaten, len: snake.length, head: snake[0], dir: dir, special: special, obstacles: obstacles.length, food: food, slow: slowUntil > gt, power: powerUntil > gt, cols: COLS, rows: ROWS, cell: cell, drawMs: drawMs, headPx: [headX, headY], monsters: monsters.map(function (m) { return { x: m.x, y: m.y, active: monsterActive(m) }; }), respawns: respawns.length }; },
       setFood: function (x, y) { food = { x: x, y: y }; },
       setSpecial: function (type, x, y) { special = { type: type, x: x, y: y, born: gt, life: 60000 }; },
       setEaten: function (n) { eaten = n; },
-      grow: function (n) { for (var i = 0; i < n; i++) snake.push({ x: snake[snake.length - 1].x, y: snake[snake.length - 1].y }); }
+      grow: function (n) { for (var i = 0; i < n; i++) snake.push({ x: snake[snake.length - 1].x, y: snake[snake.length - 1].y }); },
+      forceLevel: function (n) { level = n; syncMonsters(); refreshUI(); },
+      addMonster: function (x, y) { monsters.push({ x: x, y: y, px: x, py: y, born: gt - 2000 }); },
+      setPower: function (ms) { powerUntil = gt + ms; },
+      stepMonsters: function () { monstersStep(); }
     };
   }
 
