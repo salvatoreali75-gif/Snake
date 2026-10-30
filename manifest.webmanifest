@@ -1,7 +1,7 @@
 {
   "name": "Snake",
   "short_name": "Snake",
-  "description": "Il classico Snake, giocabile anche offline.",
+  "description": "Snake moderno: livelli, bonus e suoni. Giocabile anche offline.",
   "lang": "it",
   "start_url": "./",
   "scope": "./",
