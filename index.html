@@ -127,7 +127,7 @@ h1 {
   font-variant-numeric: tabular-nums;
 }
 
-.stage { flex: 1 1 0; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.stage { flex: 1 1 0; min-height: 0; display: flex; align-items: center; justify-content: center; touch-action: none; }
 .board {
   position: relative;
   flex: none;
@@ -194,10 +194,68 @@ canvas { display: block; width: 100%; height: 100%; }
 .btn:disabled { opacity: 0.45; cursor: default; }
 .btn:active:not(:disabled) { transform: translateY(1px); }
 
+.controls { flex: none; position: relative; height: clamp(150px, 34dvh, 300px); }
+.controls[data-mode="free"] .pad { display: none; }
+.controls[data-mode="pad"] .free { display: none; }
+.free {
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  background: var(--btn);
+  box-shadow: 0 0 0 1px var(--line);
+  overflow: hidden;
+  touch-action: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.free-ico { width: 44px; height: 44px; color: var(--muted); opacity: 0.55; pointer-events: none; }
+.free-hint { margin: 0; font-size: 0.85rem; color: var(--muted); pointer-events: none; text-align: center; }
+.free.live .free-ico, .free.live .free-hint { opacity: 0.2; }
+.stick {
+  position: absolute;
+  width: 116px;
+  height: 116px;
+  margin: -58px 0 0 -58px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: color-mix(in srgb, var(--snake) 10%, transparent);
+  pointer-events: none;
+}
+.knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 48px;
+  height: 48px;
+  margin: -24px 0 0 -24px;
+  border-radius: 50%;
+  background: var(--snake);
+  opacity: 0.9;
+  box-shadow: 0 4px 12px rgba(10, 25, 40, 0.25);
+}
+.chip {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 10px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
 .pad {
-  flex: none;
-  position: relative;
-  height: clamp(150px, 34dvh, 300px);
+  position: absolute;
+  inset: 0;
   border-radius: 22px;
   background: var(--btn);
   box-shadow: 0 0 0 1px var(--line);
@@ -223,7 +281,7 @@ canvas { display: block; width: 100%; height: 100%; }
 button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 
 @media (pointer: fine) {
-  .pad { display: none; }
+  .controls { display: none; }
   .hint { display: block; }
 }
 </style>
@@ -264,19 +322,27 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   </div>
   <p class="hint">Frecce o WASD per muoverti, spazio per la pausa. Ogni 5 cibi sale il livello.</p>
 
-  <div class="pad" id="pad" aria-label="Comandi: tocca sopra, sotto, a sinistra o a destra">
-    <div class="z z-up" id="zUp"></div>
-    <div class="z z-down" id="zDown"></div>
-    <div class="z z-left" id="zLeft"></div>
-    <div class="z z-right" id="zRight"></div>
-    <svg class="lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-      <line x1="0" y1="0" x2="100" y2="100" vector-effect="non-scaling-stroke"/>
-      <line x1="100" y1="0" x2="0" y2="100" vector-effect="non-scaling-stroke"/>
-    </svg>
-    <svg class="arr arr-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
-    <svg class="arr arr-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-    <svg class="arr arr-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
-    <svg class="arr arr-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+  <div class="controls" id="controls" data-mode="free">
+    <div class="free" id="free" aria-label="Zona comandi: scorri o trascina con il pollice">
+      <svg class="free-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg>
+      <p class="free-hint">Scorri o trascina qui col pollice</p>
+      <div class="stick" id="stick" hidden><div class="knob" id="knob"></div></div>
+    </div>
+    <div class="pad" id="pad" aria-label="Comandi: tocca sopra, sotto, a sinistra o a destra">
+      <div class="z z-up" id="zUp"></div>
+      <div class="z z-down" id="zDown"></div>
+      <div class="z z-left" id="zLeft"></div>
+      <div class="z z-right" id="zRight"></div>
+      <svg class="lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <line x1="0" y1="0" x2="100" y2="100" vector-effect="non-scaling-stroke"/>
+        <line x1="100" y1="0" x2="0" y2="100" vector-effect="non-scaling-stroke"/>
+      </svg>
+      <svg class="arr arr-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+      <svg class="arr arr-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      <svg class="arr arr-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      <svg class="arr arr-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+    </div>
+    <button class="chip" id="modeBtn" type="button">Comandi: libero</button>
   </div>
 </main>
 
@@ -884,14 +950,15 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 
   /* ---------- Swipe e tocco sulla griglia ---------- */
   var sx = 0, sy = 0, tx = 0, ty = 0, tracking = false, moved = false;
-  board.addEventListener('pointerdown', function (e) {
+  var swipeEl = $('stage');
+  swipeEl.addEventListener('pointerdown', function (e) {
     tracking = true;
     moved = false;
     sx = tx = e.clientX;
     sy = ty = e.clientY;
-    try { board.setPointerCapture(e.pointerId); } catch (err) {}
+    try { swipeEl.setPointerCapture(e.pointerId); } catch (err) {}
   });
-  board.addEventListener('pointermove', function (e) {
+  swipeEl.addEventListener('pointermove', function (e) {
     if (!tracking) return;
     var dx = e.clientX - sx, dy = e.clientY - sy;
     if (Math.max(Math.abs(dx), Math.abs(dy)) >= 24) {
@@ -902,16 +969,83 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       sy = e.clientY;
     }
   });
-  board.addEventListener('pointerup', function (e) {
+  swipeEl.addEventListener('pointerup', function (e) {
     if (!tracking) return;
     tracking = false;
     var dist = Math.hypot(e.clientX - tx, e.clientY - ty);
     if (!moved && dist < 10) primary();
   });
-  board.addEventListener('pointercancel', function () { tracking = false; });
+  swipeEl.addEventListener('pointercancel', function () { tracking = false; });
 
   /* ---------- Pad in basso: quattro zone a triangolo ---------- */
   var pad = $('pad');
+  var ctrl = $('controls'), freeEl = $('free'), stick = $('stick'), knob = $('knob'), modeBtn = $('modeBtn');
+  var ctrlMode = 'free';
+  try { ctrlMode = localStorage.getItem('snake.ctrl') === 'pad' ? 'pad' : 'free'; } catch (e) {}
+  function applyMode() {
+    ctrl.setAttribute('data-mode', ctrlMode);
+    modeBtn.textContent = ctrlMode === 'free' ? 'Comandi: libero' : 'Comandi: pad';
+  }
+  modeBtn.addEventListener('click', function () {
+    ctrlMode = ctrlMode === 'free' ? 'pad' : 'free';
+    try { localStorage.setItem('snake.ctrl', ctrlMode); } catch (e) {}
+    applyMode();
+  });
+  applyMode();
+
+  // Zona libera: joystick flottante che nasce sotto il dito, con swipe ovunque
+  var fAct = false, ax = 0, ay = 0, fx0 = 0, fy0 = 0, fMoved = false, fDir = '';
+  var STICK_R = 46;
+  function placeStick(r) {
+    stick.style.left = (ax - r.left) + 'px';
+    stick.style.top = (ay - r.top) + 'px';
+  }
+  freeEl.addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    fAct = true;
+    fMoved = false;
+    fDir = '';
+    ax = fx0 = e.clientX;
+    ay = fy0 = e.clientY;
+    placeStick(freeEl.getBoundingClientRect());
+    knob.style.transform = 'translate(0px, 0px)';
+    stick.hidden = false;
+    freeEl.classList.add('live');
+    try { freeEl.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+  freeEl.addEventListener('pointermove', function (e) {
+    if (!fAct) return;
+    var dx = e.clientX - ax, dy = e.clientY - ay, len = Math.hypot(dx, dy);
+    if (len > STICK_R) {
+      var k = (len - STICK_R) / len;
+      ax += dx * k;
+      ay += dy * k;
+      dx = e.clientX - ax;
+      dy = e.clientY - ay;
+      len = Math.hypot(dx, dy);
+      placeStick(freeEl.getBoundingClientRect());
+    }
+    knob.style.transform = 'translate(' + (dx * 0.7).toFixed(1) + 'px, ' + (dy * 0.7).toFixed(1) + 'px)';
+    if (len < 16) return;
+    var d = '';
+    if (Math.abs(dx) > Math.abs(dy) * 1.15) d = dx > 0 ? 'r' : 'l';
+    else if (Math.abs(dy) > Math.abs(dx) * 1.15) d = dy > 0 ? 'd' : 'u';
+    if (d && d !== fDir) {
+      fDir = d;
+      fMoved = true;
+      setDir(d === 'r' ? 1 : (d === 'l' ? -1 : 0), d === 'd' ? 1 : (d === 'u' ? -1 : 0));
+      buzz(6);
+    }
+  });
+  function endFree(e) {
+    if (!fAct) return;
+    fAct = false;
+    stick.hidden = true;
+    freeEl.classList.remove('live');
+    if (e && e.type === 'pointerup' && !fMoved && Math.hypot(e.clientX - fx0, e.clientY - fy0) < 10) primary();
+  }
+  freeEl.addEventListener('pointerup', endFree);
+  freeEl.addEventListener('pointercancel', endFree);
   var zoneEls = { up: $('zUp'), down: $('zDown'), left: $('zLeft'), right: $('zRight') };
   var DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
   var padActive = false, padZone = null;
