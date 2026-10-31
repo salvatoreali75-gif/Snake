@@ -271,6 +271,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 .mis { padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--btn); display: flex; flex-direction: column; gap: 6px; }
 .mis.done { border-color: var(--snake); }
 .mis small { color: var(--muted); font-size: 0.75rem; }
+.pt { margin: 6px 0 0; font-family: var(--font-display); font-size: 1rem; }
+.mis.streak { border-color: var(--snake); }
 .bar { height: 6px; border-radius: 3px; background: var(--grid); overflow: hidden; }
 .bar i { display: block; height: 100%; background: var(--snake); }
 .lbrow { display: flex; gap: 10px; align-items: baseline; padding: 7px 4px; border-bottom: 1px solid var(--line); font-size: 0.9rem; }
@@ -320,6 +322,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
           </div>
           <div class="ov-tools">
             <button class="btn" id="musicBtn" type="button">Musica: sì</button>
+            <button class="btn" id="volBtn" type="button">Volume: basso</button>
             <button class="btn" id="soundBtn" type="button">Effetti: sì</button>
             <button class="btn" id="padBtn" type="button">Pad: no</button>
             <button class="btn" id="fsBtn" type="button" hidden>Schermo intero</button>
@@ -364,7 +367,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   var board = $('board'), canvas = $('cv'), ctx = canvas.getContext('2d', { alpha: false });
   var scoreEl = $('score'), bestEl = $('best'), levelEl = $('level');
   var overlay = $('overlay'), ovTitle = $('ovTitle'), ovSub = $('ovSub');
-  var pauseBtn = $('pauseBtn'), soundBtn = $('soundBtn'), musicBtn = $('musicBtn'), padBtn = $('padBtn'), fsBtn = $('fsBtn');
+  var pauseBtn = $('pauseBtn'), soundBtn = $('soundBtn'), musicBtn = $('musicBtn'), volBtn = $('volBtn'), padBtn = $('padBtn'), fsBtn = $('fsBtn');
   var playBtn = $('playBtn'), skinBtn = $('skinBtn'), misBtn = $('misBtn'), lbBtn = $('lbBtn'), modeSeg = $('modeSeg'), modeDesc = $('modeDesc');
   var rootEl = document.documentElement;
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -464,15 +467,17 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   function lsGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function lsJson(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v && typeof v === 'object' ? v : d; } catch (e) { return d; } }
-  var mode = 'classic', skinId = 'base', musicOn = true, myName = '', stats = {}, bests = {};
+  var mode = 'classic', skinId = 'base', musicOn = true, mvol = 0, myName = '', stats = {}, bests = {};
   (function loadPrefs() {
     muted = lsGet('snake.mute', '0') === '1';
     padOn = lsGet('snake.pad', '0') === '1';
     musicOn = lsGet('snake.music', '1') !== '0';
+    mvol = Math.max(0, Math.min(2, parseInt(lsGet('snake.mvol', '0'), 10) || 0));
     skinId = lsGet('snake.skin', 'base');
     myName = lsGet('snake.name', '');
     stats = lsJson('snake.stats', {});
-    ['games', 'apples', 'stars', 'monsters', 'best', 'level', 'mdone'].forEach(function (k) { stats[k] = Number(stats[k]) || 0; });
+    ['games', 'apples', 'stars', 'monsters', 'best', 'level', 'mdone', 'wdone', 'streak', 'maxStreak'].forEach(function (k) { stats[k] = Number(stats[k]) || 0; });
+    stats.lastDay = String(stats.lastDay || '');
     bests = lsJson('snake.bests', {});
     var old = parseInt(lsGet('snake.best', '0'), 10) || 0, oldWrap = lsGet('snake.wrap', '0') === '1';
     if (old && bests.classic === undefined && bests.open === undefined) bests[oldWrap ? 'open' : 'classic'] = old;
@@ -496,8 +501,14 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     { id: 'oro', name: 'Oro', need: { k: 'level', n: 6, t: 'Arriva al livello 6' }, light: ['#D79A12', '#8F6200'], dark: ['#F5B83D', '#FFE29A'] },
     { id: 'ghiaccio', name: 'Ghiaccio', need: { k: 'best', n: 300, t: 'Fai 300 punti in una partita' }, light: ['#2A9DB5', '#16667A'], dark: ['#6FDDF2', '#D3F7FF'] },
     { id: 'notte', name: 'Notte', need: { k: 'games', n: 25, t: 'Gioca 25 partite' }, light: ['#33404D', '#0F1720'], dark: ['#8FA3B5', '#FFFFFF'] },
-    { id: 'rainbow', name: 'Arcobaleno', need: { k: 'mdone', n: 5, t: 'Completa 5 missioni' }, rainbow: true }
+    { id: 'rainbow', name: 'Arcobaleno', need: { k: 'mdone', n: 5, t: 'Completa 5 missioni' }, rainbow: true },
+    { id: 'aurora', name: 'Aurora', need: { k: 'maxStreak', n: 3, t: 'Gioca 3 giorni di fila' }, light: ['#2A9DB5', '#0F3B4A'], dark: ['#6FDDF2', '#E6FFFA'], gl: ['#1E8A5A', '#2A9DB5', '#7C4DDB'], gd: ['#4FD08F', '#6FDDF2', '#B292FF'] },
+    { id: 'fuoco', name: 'Fuoco', need: { k: 'maxStreak', n: 7, t: 'Gioca 7 giorni di fila' }, light: ['#E8801A', '#7A1E10'], dark: ['#FFA64D', '#FFF1C9'], gl: ['#C8432B', '#E8801A', '#F5B83D'], gd: ['#FF7A5C', '#FFA64D', '#FFE08A'] },
+    { id: 'sakura', name: 'Sakura', need: { k: 'wdone', n: 2, t: 'Completa 2 missioni settimanali' }, light: ['#F08FB0', '#8F1F4A'], dark: ['#FFB3CB', '#FFF0F5'], gl: ['#D9467A', '#F08FB0', '#FBC4D8'], gd: ['#FF7FA8', '#FFB3CB', '#FFD9E6'] },
+    { id: 'cosmo', name: 'Cosmo', need: { k: 'stars', n: 25, t: 'Prendi 25 stelle viola in tutto' }, light: ['#4B2A99', '#0B0E33'], dark: ['#B292FF', '#FFFFFF'], gl: ['#1B1F5E', '#4B2A99', '#7C4DDB'], gd: ['#7C8CFF', '#B292FF', '#E4D8FF'] },
+    { id: 'lava', name: 'Lava', need: { k: 'monsters', n: 20, t: 'Mangia 20 mostri in tutto' }, light: ['#8F2C1B', '#000000'], dark: ['#FF7A5C', '#FFE2C4'], gl: ['#1F1F1F', '#8F2C1B', '#FF6A2A'], gd: ['#5A5A5A', '#FF7A5C', '#FFB070'] }
   ];
+  function skinGrad(s) { return isDark() ? s.gd : s.gl; }
   function isDark() {
     var t = document.documentElement.getAttribute('data-theme');
     if (t) return t === 'dark';
@@ -512,7 +523,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   function skinCols(s) { return s.light ? (isDark() ? s.dark : s.light) : null; }
   function activeSkin() { var s = skinById(skinId); return skinOk(s) ? s : SKINS[0]; }
 
-  /* ---------- Missioni giornaliere (3 al giorno, uguali per tutti i telefoni) ---------- */
+  /* ---------- Missioni (3 al giorno e 3 a settimana, uguali per tutti i telefoni) e serie di giorni ---------- */
   var MIS = [
     { k: 'apples', t: 'Mangia {n} mele', n: [15, 30, 50], acc: true },
     { k: 'score', t: 'Fai {n} punti in una partita', n: [80, 150, 250] },
@@ -522,10 +533,25 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     { k: 'monsters', t: 'Mangia {n} mostri col Potere', n: [1, 2, 3], acc: true },
     { k: 'timed', t: 'Fai {n} punti in modalità A tempo', n: [60, 120, 200] }
   ];
-  var daily = null;
-  function todayKey() {
-    var d = new Date(), z = function (v) { return (v < 10 ? '0' : '') + v; };
+  var MIS_W = [
+    { k: 'apples', t: 'Mangia {n} mele in settimana', n: [150, 250, 400], acc: true },
+    { k: 'stars', t: 'Prendi {n} stelle viola in settimana', n: [8, 12, 18], acc: true },
+    { k: 'monsters', t: 'Mangia {n} mostri in settimana', n: [6, 10, 15], acc: true },
+    { k: 'games', t: 'Gioca {n} partite in settimana', n: [15, 25, 40], acc: true },
+    { k: 'score', t: 'Fai {n} punti in una partita', n: [300, 450, 600] },
+    { k: 'level', t: 'Arriva al livello {n}', n: [8, 10, 12] },
+    { k: 'timed', t: 'Fai {n} punti in modalità A tempo', n: [250, 350, 450] }
+  ];
+  var daily = null, weekly = null;
+  function dayKey(d) {
+    var z = function (v) { return (v < 10 ? '0' : '') + v; };
     return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate());
+  }
+  function todayKey() { return dayKey(new Date()); }
+  function weekKey() {
+    var d = new Date();
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));     // lunedì della settimana
+    return dayKey(d);
   }
   function rng(seed) {
     return function () {
@@ -535,44 +561,68 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       return ((t ^ t >>> 14) >>> 0) / 4294967296;
     };
   }
-  function makeDaily() {
-    var key = todayKey(), r = rng(parseInt(key.replace(/-/g, ''), 10)), pool = MIS.slice(), out = [];
-    while (out.length < 3 && pool.length) {
-      var m = pool.splice(Math.floor(r() * pool.length), 1)[0];
+  function makeSet(key, pool) {
+    var r = rng(parseInt(key.replace(/-/g, ''), 10)), p = pool.slice(), out = [];
+    while (out.length < 3 && p.length) {
+      var m = p.splice(Math.floor(r() * p.length), 1)[0];
       out.push({ k: m.k, n: m.n[Math.floor(r() * 3)], p: 0, d: false });
     }
     return { date: key, m: out };
   }
-  function saveDaily() { lsSet('snake.daily', JSON.stringify(daily)); }
-  function loadDaily() {
-    var d = lsJson('snake.daily', null);
-    if (!d || d.date !== todayKey() || !Array.isArray(d.m) || d.m.length !== 3) { d = makeDaily(); daily = d; saveDaily(); }
-    daily = d;
+  function loadSet(ls, key, pool) {
+    var d = lsJson(ls, null);
+    if (!d || d.date !== key || !Array.isArray(d.m) || d.m.length !== 3) { d = makeSet(key, pool); lsSet(ls, JSON.stringify(d)); }
+    return d;
   }
-  function misDef(k) { for (var i = 0; i < MIS.length; i++) if (MIS[i].k === k) return MIS[i]; return MIS[0]; }
-  function misText(m) { return misDef(m.k).t.replace('{n}', m.n); }
+  function loadDaily() {
+    daily = loadSet('snake.daily', todayKey(), MIS);
+    weekly = loadSet('snake.weekly', weekKey(), MIS_W);
+  }
+  function saveSets() {
+    lsSet('snake.daily', JSON.stringify(daily));
+    lsSet('snake.weekly', JSON.stringify(weekly));
+  }
+  function misDef(k, pool) { for (var i = 0; i < pool.length; i++) if (pool[i].k === k) return pool[i]; return pool[0]; }
+  function misText(m, pool) { return misDef(m.k, pool).t.replace('{n}', m.n); }
   function missionEvent(k, amount, absolute) {
-    if (!daily || daily.date !== todayKey()) loadDaily();
+    if (!daily || daily.date !== todayKey() || !weekly || weekly.date !== weekKey()) loadDaily();
     var changed = false;
-    daily.m.forEach(function (m) {
-      if (m.k !== k || m.d) return;
-      m.p = absolute ? Math.max(m.p, amount) : m.p + amount;
-      changed = true;
-      if (m.p >= m.n) {
-        m.p = m.n;
-        m.d = true;
-        stats.mdone = statVal('mdone') + 1;
-        bannerText = 'Missione compiuta!';
-        bannerSub = misText(m);
-        bannerAt = performance.now();
-        SFX.bonus();
-      }
+    [[daily, MIS, 'mdone', 'Missione compiuta!'], [weekly, MIS_W, 'wdone', 'Missione settimanale!']].forEach(function (s) {
+      s[0].m.forEach(function (m) {
+        if (m.k !== k || m.d) return;
+        m.p = absolute ? Math.max(m.p, amount) : m.p + amount;
+        changed = true;
+        if (m.p >= m.n) {
+          m.p = m.n;
+          m.d = true;
+          stats[s[2]] = statVal(s[2]) + 1;
+          bannerText = s[3];
+          bannerSub = misText(m, s[1]);
+          bannerAt = performance.now();
+          SFX.bonus();
+        }
+      });
     });
-    if (changed) saveDaily();
+    if (changed) saveSets();
+  }
+  function curStreak() {
+    if (!stats.lastDay) return 0;
+    var y = new Date();
+    y.setDate(y.getDate() - 1);
+    return (stats.lastDay === todayKey() || stats.lastDay === dayKey(y)) ? stats.streak : 0;
+  }
+  function touchStreak() {
+    var tk = todayKey();
+    if (stats.lastDay === tk) return;
+    var y = new Date();
+    y.setDate(y.getDate() - 1);
+    stats.streak = (stats.lastDay === dayKey(y)) ? stats.streak + 1 : 1;
+    stats.lastDay = tk;
+    if (stats.streak > stats.maxStreak) stats.maxStreak = stats.streak;
   }
 
   /* ---------- Musica di sottofondo (generata nel gioco, volume basso) ---------- */
-  var MUSIC_VOL = 0.2, mgain = null, mtimer = null, mnext = 0, mstep = 0;
+  var MUSIC_LEVELS = [0.2, 0.36, 0.6], MUSIC_NAMES = ['basso', 'medio', 'alto'], mgain = null, mtimer = null, mnext = 0, mstep = 0;
   // Otto battute in La minore: Am F C G Am F Dm E
   var CH = [{ r: 57, t: 3 }, { r: 53, t: 4 }, { r: 60, t: 4 }, { r: 55, t: 4 }, { r: 57, t: 3 }, { r: 53, t: 4 }, { r: 50, t: 3 }, { r: 52, t: 4 }];
   var ARP = [0, 2, 1, 2, 3, 2, 1, 2];
@@ -651,7 +701,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       if (!mgain) { mgain = actx.createGain(); mgain.gain.value = 0; mgain.connect(actx.destination); }
       var t = actx.currentTime;
       mgain.gain.cancelScheduledValues(t);
-      mgain.gain.setTargetAtTime(MUSIC_VOL, t, 0.25);
+      mgain.gain.setTargetAtTime(MUSIC_LEVELS[mvol], t, 0.25);
       if (!mtimer) { mnext = t + 0.08; mtimer = setInterval(musicTick, 100); }
     } catch (e) {}
   }
@@ -727,18 +777,25 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     SKINS.forEach(function (s) {
       var ok = skinOk(s), cols = skinCols(s) || [C.snake, C['snake-head']], cur = s.id === activeSkin().id;
       h += '<button class="skin' + (cur ? ' on' : '') + (ok ? '' : ' lock') + '" type="button" data-a="skin" data-id="' + s.id + '"' + (ok ? '' : ' disabled') + '>' +
-        '<span class="sw' + (s.rainbow ? ' rb' : '') + '" style="--a:' + cols[0] + ';--b:' + (s.rainbow ? '#b292ff' : cols[1]) + '"></span>' +
+        '<span class="sw' + (s.rainbow ? ' rb' : '') + '" style="--a:' + cols[0] + ';--b:' + (s.rainbow ? '#b292ff' : cols[1]) + (s.gl ? ';background:linear-gradient(90deg,' + skinGrad(s).join(',') + ')' : '') + '"></span>' +
         '<b>' + s.name + '</b><small>' + (ok ? (cur ? 'In uso' : 'Tocca per usarla') : s.need.t + ' (' + Math.min(statVal(s.need.k), s.need.n) + ' su ' + s.need.n + ')') + '</small></button>';
     });
     return h + '</div><p class="pnote">Le skin si sbloccano giocando.</p></div>';
   }
-  function misPanel() {
-    if (!daily || daily.date !== todayKey()) loadDaily();
-    var h = panelHead('Missioni di oggi') + '<div class="pb">';
-    daily.m.forEach(function (m) {
-      h += '<div class="mis' + (m.d ? ' done' : '') + '"><b>' + escH(misText(m)) + '</b><div class="bar"><i style="width:' + Math.min(100, Math.round(m.p / m.n * 100)) + '%"></i></div><small>' + (m.d ? 'Completata' : m.p + ' su ' + m.n) + '</small></div>';
+  function misBlock(title, set, pool) {
+    var h = '<h3 class="pt">' + title + '</h3>';
+    set.m.forEach(function (m) {
+      h += '<div class="mis' + (m.d ? ' done' : '') + '"><b>' + escH(misText(m, pool)) + '</b><div class="bar"><i style="width:' + Math.min(100, Math.round(m.p / m.n * 100)) + '%"></i></div><small>' + (m.d ? 'Completata' : m.p + ' su ' + m.n) + '</small></div>';
     });
-    return h + '<p class="pnote">Le missioni cambiano ogni giorno. Completate in tutto: ' + statVal('mdone') + '. Con 5 missioni sblocchi la skin Arcobaleno.</p></div>';
+    return h;
+  }
+  function misPanel() {
+    if (!daily || daily.date !== todayKey() || !weekly || weekly.date !== weekKey()) loadDaily();
+    var st = curStreak();
+    return panelHead('Missioni') + '<div class="pb">' +
+      '<div class="mis streak"><b>Serie: ' + st + (st === 1 ? ' giorno' : ' giorni') + ' di fila</b><small>Record ' + Math.max(statVal('maxStreak'), st) + '. Gioca ogni giorno per tenerla viva: a 3 e a 7 giorni sblocchi due skin.</small></div>' +
+      misBlock('Oggi', daily, MIS) + misBlock('Questa settimana', weekly, MIS_W) +
+      '<p class="pnote">Completate in tutto: ' + statVal('mdone') + ' giornaliere e ' + statVal('wdone') + ' settimanali. Le giornaliere cambiano ogni giorno, le settimanali ogni lunedì.</p></div>';
   }
   function lbChips() {
     return '<div class="seg">' + MODES.map(function (m) { return '<button class="chip' + (m.id === lbMode ? ' on' : '') + '" type="button" data-a="lbmode" data-id="' + m.id + '">' + m.name + '</button>'; }).join('') + '</div>';
@@ -975,6 +1032,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 
   function recordGame() {
     stats.games++;
+    touchStreak();
     if (score > stats.best) stats.best = score;
     if (level > stats.level) stats.level = level;
     missionEvent('games', 1);
@@ -1259,6 +1317,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     padBtn.disabled = !idle;
     soundBtn.textContent = muted ? 'Effetti: no' : 'Effetti: sì';
     musicBtn.textContent = musicOn ? 'Musica: sì' : 'Musica: no';
+    volBtn.textContent = 'Volume: ' + MUSIC_NAMES[mvol];
+    volBtn.disabled = !musicOn;
     padBtn.textContent = padOn ? 'Pad: sì' : 'Pad: no';
     each4(modeSeg.children, function (b) {
       var on = b.getAttribute('data-mode') === mode;
@@ -1480,6 +1540,12 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       for (var gi = 0; gi <= 4; gi++) gr.addColorStop(gi / 4, 'hsl(' + Math.round((t / 14 + gi * 70) % 360) + ',85%,' + (isDark() ? 62 : 52) + '%)');
       bodyCol = gr;
       headCol = 'hsl(' + Math.round((t / 14 - 40 + 360) % 360) + ',85%,' + (isDark() ? 70 : 40) + '%)';
+    }
+    if (sk.gl) {
+      var tl2 = pts[pts.length - 1], gx2 = tl2.x - pts[0].x, gy2 = tl2.y - pts[0].y, gl2 = Math.hypot(gx2, gy2) || 1, span2 = Math.max(gl2, c * 5), cs = skinGrad(sk);
+      var gr2 = ctx.createLinearGradient(pts[0].x, pts[0].y, pts[0].x + gx2 / gl2 * span2, pts[0].y + gy2 / gl2 * span2);
+      for (var gj = 0; gj < cs.length; gj++) gr2.addColorStop(gj / (cs.length - 1), cs[gj]);
+      bodyCol = gr2;
     }
     ctx.strokeStyle = bodyCol;
     for (j = 0; j < runs.length; j++) strokeRun(runs[j]);
@@ -1742,6 +1808,16 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     refreshUI();
   });
   playBtn.addEventListener('click', function () { primary(); });
+  volBtn.addEventListener('click', function () {
+    mvol = (mvol + 1) % MUSIC_LEVELS.length;
+    lsSet('snake.mvol', String(mvol));
+    audio();
+    if (musicOn) {
+      if (mgain) mgain.gain.setTargetAtTime(MUSIC_LEVELS[mvol], actx.currentTime, 0.05);
+      if (state !== 'running') { musicStart(); setTimeout(function () { if (state !== 'running') musicStop(); }, 1600); }
+    }
+    refreshUI();
+  });
   skinBtn.addEventListener('click', function () { openPanel('skin'); });
   misBtn.addEventListener('click', function () { openPanel('mis'); });
   lbBtn.addEventListener('click', function () { lbMode = mode; openPanel('lb'); });
@@ -1804,6 +1880,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       stepMonsters: function () { monstersStep(); },
       stats: function () { return JSON.parse(JSON.stringify(stats)); },
       daily: function () { return JSON.parse(JSON.stringify(daily)); },
+      weekly: function () { return JSON.parse(JSON.stringify(weekly)); },
+      streak: function () { return curStreak(); },
       timeLeft: function () { return timeLeft; },
       setTime: function (ms) { timeLeft = ms; },
       mode: function () { return mode; },
@@ -1811,7 +1889,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       setStats: function (o) { for (var k in o) stats[k] = o[k]; },
       renderMusic: function (sec) {
         var oc = new OfflineAudioContext(1, 44100 * sec, 44100), g = oc.createGain(), t = 0, n = 0;
-        g.gain.value = MUSIC_VOL; g.connect(oc.destination);
+        g.gain.value = MUSIC_LEVELS[mvol]; g.connect(oc.destination);
         while (t < sec) { mstepSched(oc, g, n, t, 100); t += 30 / 100; n++; }
         return oc.startRendering().then(function (buf) {
           var d = buf.getChannelData(0), pk = 0, ss = 0;
