@@ -284,6 +284,39 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 .nick input { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--btn); color: var(--ink); -webkit-user-select: text; user-select: text; }
 .pnote { margin: 0; font-size: 0.78rem; color: var(--muted); }
 
+
+/* Gemme, negozio, notifiche e benvenuto */
+.gempill { font: inherit; font-weight: 800; font-size: 0.95rem; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--btn); color: var(--ink); cursor: pointer; touch-action: manipulation; }
+.gemrow { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--snake); background: var(--btn); font-size: 1.05rem; }
+.gemrow small { font-size: 0.75rem; color: var(--muted); }
+.skins .full { grid-column: 1 / -1; }
+.skin .pr { font-weight: 800; color: var(--ink); }
+.skin.can { box-shadow: 0 0 0 2px var(--food); }
+.skin.arm { box-shadow: 0 0 0 2px var(--danger); }
+.notifs { position: fixed; left: 0; right: 0; top: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: max(10px, env(safe-area-inset-top)) 10px 0; pointer-events: none; }
+.notif { pointer-events: auto; width: min(430px, 100%); display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 18px; background: var(--btn); color: var(--ink); border: 1px solid var(--line); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28); animation: nin 0.38s cubic-bezier(0.2, 0.9, 0.3, 1.25); text-align: left; }
+.notif.out { animation: nout 0.25s ease-in forwards; }
+.notif .ni { flex: none; width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; font-size: 1.45rem; background: var(--grid); }
+.notif .nb { flex: 1; min-width: 0; }
+.notif .nt { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 1rem; line-height: 1.2; }
+.notif .nx { margin: 3px 0 0; font-size: 0.84rem; color: var(--muted); line-height: 1.35; }
+.notif .na { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.notif .na .chip.pri { background: var(--snake); color: var(--board); border-color: var(--snake); }
+.notif .nc { flex: none; font: inherit; font-size: 1.3rem; line-height: 1; padding: 2px 6px; border: 0; background: none; color: var(--muted); cursor: pointer; }
+@keyframes nin { from { transform: translateY(-120%); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes nout { to { transform: translateY(-120%); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .notif, .notif.out { animation: none; } }
+.welcome { position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 20px; background: var(--bg); overflow-y: auto; }
+.welcome[hidden] { display: none; }
+.wbox { width: min(380px, 100%); display: flex; flex-direction: column; gap: 12px; text-align: center; }
+.wbox .wlogo { font-size: 3rem; line-height: 1; }
+.wbox h2 { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 1.7rem; }
+.wbox p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+.wbox input { font: inherit; font-size: 18px; text-align: center; padding: 13px 14px; border-radius: 14px; border: 2px solid var(--line); background: var(--btn); color: var(--ink); -webkit-user-select: text; user-select: text; }
+.wbox input:focus { outline: none; border-color: var(--snake); }
+.wbox .werr { color: var(--danger); min-height: 1.2em; font-size: 0.85rem; }
+.wbox ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; text-align: left; font-size: 0.88rem; color: var(--ink); }
+
 @media (pointer: fine) {
   body.pad-on .pad { display: none; }
   .hint { display: block; }
@@ -310,6 +343,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       <canvas id="cv"></canvas>
       <div class="overlay" id="overlay">
         <div class="ovin">
+          <button class="gempill" id="gemPill" type="button" aria-label="Gemme: apri il negozio">💎 <b id="gemN">0</b></button>
           <p class="ov-title" id="ovTitle">Pronto?</p>
           <p class="ov-sub" id="ovSub">Tocca lo schermo per iniziare</p>
           <button class="btn play" id="playBtn" type="button">Gioca</button>
@@ -356,6 +390,19 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     <svg class="arr arr-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
   </div>
 </main>
+<div class="notifs" id="notifs" aria-live="polite"></div>
+<div class="welcome" id="welcome" hidden>
+  <form class="wbox" id="wform" novalidate>
+    <div class="wlogo" aria-hidden="true">🐍</div>
+    <h2 id="wtitle">Benvenuto in Snake!</h2>
+    <p id="wtext">Scegli il tuo nickname. Con questo entri subito in classifica e gli altri giocatori ti riconoscono.</p>
+    <input id="wnick" type="text" maxlength="14" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Il tuo nickname" aria-label="Nickname">
+    <p class="werr" id="werr" role="alert"></p>
+    <button class="btn play" id="wgo" type="submit">Entra in classifica</button>
+    <ul><li>💎 Guadagni gemme giocando, con le missioni e ogni giorno</li><li>🎨 Le spendi tu per sbloccare le skin che vuoi</li><li>🏆 Il tuo record va in classifica da solo</li></ul>
+    <p class="pnote">Da 3 a 14 caratteri. Lo puoi cambiare dalla Classifica.</p>
+  </form>
+</div>
 
 <script>
 (function () {
@@ -506,7 +553,24 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     { id: 'fuoco', name: 'Fuoco', need: { k: 'maxStreak', n: 7, t: 'Gioca 7 giorni di fila' }, light: ['#E8801A', '#7A1E10'], dark: ['#FFA64D', '#FFF1C9'], gl: ['#C8432B', '#E8801A', '#F5B83D'], gd: ['#FF7A5C', '#FFA64D', '#FFE08A'] },
     { id: 'sakura', name: 'Sakura', need: { k: 'wdone', n: 2, t: 'Completa 2 missioni settimanali' }, light: ['#F08FB0', '#8F1F4A'], dark: ['#FFB3CB', '#FFF0F5'], gl: ['#D9467A', '#F08FB0', '#FBC4D8'], gd: ['#FF7FA8', '#FFB3CB', '#FFD9E6'] },
     { id: 'cosmo', name: 'Cosmo', need: { k: 'stars', n: 25, t: 'Prendi 25 stelle viola in tutto' }, light: ['#4B2A99', '#0B0E33'], dark: ['#B292FF', '#FFFFFF'], gl: ['#1B1F5E', '#4B2A99', '#7C4DDB'], gd: ['#7C8CFF', '#B292FF', '#E4D8FF'] },
-    { id: 'lava', name: 'Lava', need: { k: 'monsters', n: 20, t: 'Mangia 20 mostri in tutto' }, light: ['#8F2C1B', '#000000'], dark: ['#FF7A5C', '#FFE2C4'], gl: ['#1F1F1F', '#8F2C1B', '#FF6A2A'], gd: ['#5A5A5A', '#FF7A5C', '#FFB070'] }
+    { id: 'lava', name: 'Lava', need: { k: 'monsters', n: 20, t: 'Mangia 20 mostri in tutto' }, light: ['#8F2C1B', '#000000'], dark: ['#FF7A5C', '#FFE2C4'], gl: ['#1F1F1F', '#8F2C1B', '#FF6A2A'], gd: ['#5A5A5A', '#FF7A5C', '#FFB070'] },
+    { id: 'menta', name: 'Menta', price: 80, light: ['#2FB39A', '#17715F'], dark: ['#7FE6D0', '#D8FFF5'], gl: ['#17715F', '#2FB39A', '#8FE8D4'], gd: ['#4FC9B0', '#7FE6D0', '#D8FFF5'] },
+    { id: 'pesca', name: 'Pesca', price: 80, light: ['#EE8B6E', '#A8442A'], dark: ['#FFB59C', '#FFE7DD'], gl: ['#C85B3E', '#EE8B6E', '#F8C4A8'], gd: ['#FF9A7E', '#FFB59C', '#FFE0D2'] },
+    { id: 'cielo', name: 'Cielo', price: 120, light: ['#3C8DD9', '#1B4F8C'], dark: ['#7DBBFF', '#E0F0FF'], gl: ['#1B4F8C', '#3C8DD9', '#8FC4F5'], gd: ['#5AA4EB', '#7DBBFF', '#D6EBFF'] },
+    { id: 'lampone', name: 'Lampone', price: 120, light: ['#C2336B', '#7A1445'], dark: ['#FF6FA0', '#FFD6E6'], gl: ['#7A1445', '#C2336B', '#F27AA6'], gd: ['#E04E85', '#FF6FA0', '#FFC2D8'] },
+    { id: 'ambra', name: 'Ambra', price: 200, light: ['#D88A1A', '#7A4A00'], dark: ['#FFC04D', '#FFF0C8'], gl: ['#7A4A00', '#D88A1A', '#F7C860'], gd: ['#E6A530', '#FFC04D', '#FFEBB5'] },
+    { id: 'oceano', name: 'Oceano', price: 200, light: ['#0F6E8C', '#08334A'], dark: ['#4FB8DD', '#CFF1FF'], gl: ['#08334A', '#0F6E8C', '#37B3D6'], gd: ['#2B90B8', '#4FB8DD', '#BDEBFF'] },
+    { id: 'giungla', name: 'Giungla', price: 300, light: ['#2F7D32', '#14451A'], dark: ['#7ED47F', '#DFFFD9'], gl: ['#14451A', '#2F7D32', '#8BCB4C'], gd: ['#4CAF50', '#7ED47F', '#CFF5A0'] },
+    { id: 'tramonto', name: 'Tramonto', price: 300, light: ['#E0603A', '#6A1B5E'], dark: ['#FF8A5C', '#FFD9F0'], gl: ['#6A1B5E', '#E0603A', '#F7B538'], gd: ['#B04FA0', '#FF8A5C', '#FFD36B'] },
+    { id: 'ametista', name: 'Ametista', price: 450, light: ['#8E44C9', '#4A1B7A'], dark: ['#C490F5', '#F1E3FF'], gl: ['#4A1B7A', '#8E44C9', '#D1A6F5'], gd: ['#9C5BDB', '#C490F5', '#F1E3FF'] },
+    { id: 'neon', name: 'Neon', price: 450, glow: '#00FFAA', light: ['#00A878', '#007A55'], dark: ['#39FFB0', '#E8FFF6'], gl: ['#00A878', '#00E0A0', '#7CFFD0'], gd: ['#1DE9A5', '#39FFB0', '#B8FFE6'] },
+    { id: 'galassia', name: 'Galassia', price: 650, flow: { h: 265, r: 55 }, light: ['#5B3FD1', '#241565'], dark: ['#9A86FF', '#E8E2FF'], gl: ['#241565', '#5B3FD1', '#E04FA8'], gd: ['#6F5BFF', '#9A86FF', '#FF7FD0'] },
+    { id: 'zucchero', name: 'Zucchero filato', price: 650, light: ['#EF7FB6', '#B03E7A'], dark: ['#FF9AC8', '#FFE3F0'], gl: ['#7FD3F5', '#EF7FB6', '#FFE08A'], gd: ['#8FDCFA', '#FF9AC8', '#FFE9A0'] },
+    { id: 'platino', name: 'Platino', price: 650, light: ['#8A9BA8', '#3B4954'], dark: ['#DDE6EC', '#FFFFFF'], gl: ['#3B4954', '#8A9BA8', '#E3EBF0'], gd: ['#9FB0BC', '#DDE6EC', '#FFFFFF'] },
+    { id: 'elettrico', name: 'Elettrico', price: 900, glow: '#4DD2FF', light: ['#1F8FFF', '#0A3C8A'], dark: ['#5CC8FF', '#E3F6FF'], gl: ['#0A3C8A', '#1F8FFF', '#6FE3FF'], gd: ['#2FA0FF', '#5CC8FF', '#C8F2FF'] },
+    { id: 'ororosa', name: 'Oro rosa', price: 900, light: ['#D9917F', '#8A4A3C'], dark: ['#F7C1B2', '#FFEFE9'], gl: ['#8A4A3C', '#D9917F', '#F7D3C6'], gd: ['#E8A898', '#F7C1B2', '#FFF0EA'] },
+    { id: 'drago', name: 'Drago', price: 1200, glow: '#FF6A2A', flow: { h: 22, r: 24 }, light: ['#C0392B', '#5E0F08'], dark: ['#FF7A5C', '#FFE1B8'], gl: ['#5E0F08', '#C0392B', '#F39C12'], gd: ['#E5533F', '#FF7A5C', '#FFC857'] },
+    { id: 'diamante', name: 'Diamante', price: 1500, glow: '#9BEAFF', flow: { h: 195, r: 40 }, light: ['#2A9DB5', '#16667A'], dark: ['#BFF3FF', '#FFFFFF'], gl: ['#2A9DB5', '#7FDDF2', '#FFFFFF'], gd: ['#6FDDF2', '#BFF3FF', '#FFFFFF'] }
   ];
   function skinGrad(s) { return isDark() ? s.gd : s.gl; }
   function isDark() {
@@ -519,9 +583,175 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     return SKINS[0];
   }
   function statVal(k) { return Number(stats[k]) || 0; }
-  function skinOk(s) { return !s.need || statVal(s.need.k) >= s.need.n; }
+  function skinOk(s) {
+    if (s.price) return !!(wallet.owned && wallet.owned[s.id]);
+    return !s.need || statVal(s.need.k) >= s.need.n;
+  }
   function skinCols(s) { return s.light ? (isDark() ? s.dark : s.light) : null; }
   function activeSkin() { var s = skinById(skinId); return skinOk(s) ? s : SKINS[0]; }
+
+  /* ---------- Gemme, negozio e notifiche ---------- */
+  var GEM_DAILY = 25, GEM_WEEKLY = 80, GEM_WELCOME = 50;
+  var wallet = (function () {
+    var w = lsJson('snake.wallet', {});
+    w.gems = Math.max(0, Math.floor(Number(w.gems) || 0));
+    w.earned = Math.max(0, Math.floor(Number(w.earned) || 0));
+    w.owned = (w.owned && typeof w.owned === 'object') ? w.owned : {};
+    w.nt = (w.nt && typeof w.nt === 'object') ? w.nt : {};
+    w.days = (w.days && typeof w.days === 'object') ? w.days : {};
+    w.last = String(w.last || '');
+    return w;
+  })();
+  function saveWallet() { lsSet('snake.wallet', JSON.stringify(wallet)); }
+  var misDoneQ = [], lastGems = 0, newSkinIds = [], buyArm = '';
+  function keyOffset(n) { var d = new Date(); d.setDate(d.getDate() + n); return dayKey(d); }
+  function addGems(n) {
+    n = Math.max(0, Math.floor(n));
+    if (!n) return;
+    var tk = todayKey(), ks, i;
+    wallet.gems += n;
+    wallet.earned += n;
+    wallet.days[tk] = (wallet.days[tk] || 0) + n;
+    ks = Object.keys(wallet.days).sort();
+    for (i = 0; i < ks.length - 14; i++) delete wallet.days[ks[i]];
+    saveWallet();
+    refreshGems();
+  }
+  function refreshGems() {
+    var el = document.getElementById('gemN');
+    if (el) el.textContent = wallet.gems;
+  }
+  function shopList() { return SKINS.filter(function (x) { return x.price; }).sort(function (a, b) { return a.price - b.price; }); }
+  function buySkin(id, equip) {
+    var sk = skinById(id);
+    if (!sk.price || skinOk(sk) || wallet.gems < sk.price) return false;
+    wallet.gems -= sk.price;
+    wallet.owned[id] = 1;
+    wallet.nt[id] = 1;
+    saveWallet();
+    if (equip) { skinId = id; lsSet('snake.skin', id); }
+    buyArm = '';
+    refreshGems();
+    SFX.bonus();
+    notify({ icon: '🎉', title: '«' + sk.name + '» è tua!', text: equip ? 'La skin è già in uso. Ti restano ' + wallet.gems + ' gemme.' : 'Ti restano ' + wallet.gems + ' gemme.',
+      actions: equip ? [] : [{ label: 'Usala ora', pri: true, fn: function () { skinId = id; lsSet('snake.skin', id); if (panelKind === 'skin') openPanel('skin'); } }] });
+    if (panelKind === 'skin') openPanel('skin');
+    return true;
+  }
+  function checkAfford() {
+    var cand = shopList().filter(function (x) { return !skinOk(x) && !wallet.nt[x.id] && wallet.gems >= x.price; });
+    if (!cand.length) return;
+    cand.forEach(function (x) { wallet.nt[x.id] = 1; });
+    saveWallet();
+    var top = cand[cand.length - 1];
+    notify({ icon: '💎', title: 'Puoi sbloccare «' + top.name + '»!', text: 'Hai ' + wallet.gems + ' gemme e «' + top.name + '» ne costa ' + top.price + '.' + (cand.length > 1 ? ' Altre ' + (cand.length - 1) + (cand.length === 2 ? ' skin sono' : ' skin sono') + ' alla tua portata.' : ''),
+      actions: [{ label: 'Sblocca ora', pri: true, fn: function () { buySkin(top.id, true); } }, { label: 'Vai al negozio', fn: function () { openPanel('skin'); } }] });
+  }
+  function loginCheck() {
+    var tk = todayKey();
+    if (wallet.last === tk) return;
+    var first = !wallet.last, yG = wallet.days[keyOffset(-1)] || 0, st = curStreak(), bonus = 10 + 5 * Math.min(st, 6);
+    wallet.last = tk;
+    if (first) {
+      addGems(GEM_WELCOME);
+      notify({ icon: '🎁', title: 'Novità: le gemme!', text: 'Ne hai già ' + wallet.gems + ' in regalo. Le guadagni giocando, con le missioni e con l’accesso di ogni giorno, e le spendi tu per sbloccare le skin che vuoi.',
+        actions: [{ label: 'Vai al negozio', pri: true, fn: function () { openPanel('skin'); } }] });
+    } else {
+      addGems(bonus);
+      notify({ icon: '☀️', title: 'Bentornato' + (myName ? ', ' + myName : '') + '!', text: 'Accesso di oggi +' + bonus + ' 💎' + (st ? ' (serie di ' + st + (st === 1 ? ' giorno' : ' giorni') + ')' : '') + '. ' +
+        (yG ? 'Ieri hai guadagnato ' + yG + ' gemme.' : 'Ieri non hai guadagnato gemme: oggi si riparte!') + ' Ora ne hai ' + wallet.gems + '.',
+        actions: [{ label: 'Missioni', pri: true, fn: function () { openPanel('mis'); } }, { label: 'Negozio', fn: function () { openPanel('skin'); } }] });
+    }
+    saveWallet();
+    checkAfford();
+  }
+
+  var notifQ = [], notifHold = [], notifCur = null, notifTimer = 0, flushTimer = 0;
+  var notifsEl = document.getElementById('notifs');
+  function notify(o) {
+    if (state === 'running') notifHold.push(o);
+    else { notifQ.push(o); showNotif(); }
+  }
+  function showNotif() {
+    if (notifCur || !notifQ.length || !notifsEl) return;
+    var o = notifQ.shift(), el = document.createElement('div'), h = '';
+    el.className = 'notif';
+    el.setAttribute('role', 'status');
+    h = '<div class="ni" aria-hidden="true">' + o.icon + '</div><div class="nb"><p class="nt">' + escH(o.title) + '</p><p class="nx">' + escH(o.text) + '</p>';
+    if (o.actions && o.actions.length) {
+      h += '<div class="na">';
+      o.actions.forEach(function (a, i) { h += '<button class="chip' + (a.pri ? ' pri' : '') + '" type="button" data-n="' + i + '">' + escH(a.label) + '</button>'; });
+      h += '</div>';
+    }
+    el.innerHTML = h + '</div><button class="nc" type="button" data-n="x" aria-label="Chiudi">×</button>';
+    notifsEl.appendChild(el);
+    notifCur = el;
+    el.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-n]') : null;
+      if (!b) return;
+      var k = b.getAttribute('data-n');
+      closeNotif(el);
+      if (k !== 'x' && o.actions && o.actions[+k]) o.actions[+k].fn();
+    });
+    clearTimeout(notifTimer);
+    notifTimer = setTimeout(function () { closeNotif(el); }, (o.actions && o.actions.length) ? 11000 : 6500);
+  }
+  function closeNotif(el) {
+    if (notifCur !== el) return;
+    clearTimeout(notifTimer);
+    notifCur = null;
+    el.classList.add('out');
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); showNotif(); }, 260);
+  }
+  function holdAll() {
+    if (notifCur) { var c = notifCur; notifCur = null; clearTimeout(notifTimer); if (c.parentNode) c.parentNode.removeChild(c); }
+    notifHold = notifQ.concat(notifHold);
+    notifQ = [];
+  }
+  function endNotifs() {
+    flushTimer = 0;
+    if (state === 'running') return;
+    if (misDoneQ.length) {
+      var q = misDoneQ, tot = q.reduce(function (n, x) { return n + x.g; }, 0);
+      misDoneQ = [];
+      SFX.bonus();
+      if (q.length === 1) notify({ icon: '🏆', title: q[0].w ? 'Missione settimanale compiuta!' : 'Missione compiuta!', text: q[0].t + '. Premio +' + q[0].g + ' 💎.', actions: [{ label: 'Vedi missioni', pri: true, fn: function () { openPanel('mis'); } }] });
+      else notify({ icon: '🏆', title: q.length + ' missioni compiute!', text: q.map(function (x) { return x.t; }).join(' · ') + '. Premio totale +' + tot + ' 💎.', actions: [{ label: 'Vedi missioni', pri: true, fn: function () { openPanel('mis'); } }] });
+    }
+    var h = notifHold;
+    notifHold = [];
+    h.forEach(function (o) { notifQ.push(o); });
+    showNotif();
+  }
+  function scheduleEndNotifs() {
+    if (state === 'running' || flushTimer || !(misDoneQ.length || notifHold.length)) return;
+    flushTimer = setTimeout(endNotifs, 450);
+  }
+
+  /* ---------- Benvenuto: nickname al primo accesso ---------- */
+  var welcomeEl = document.getElementById('welcome');
+  function cleanNick(v) { return String(v || '').replace(/[\u0000-\u001F<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 14); }
+  function nickError(v) {
+    if (v.length < 3) return 'Scrivi almeno 3 caratteri.';
+    if (!/^[A-Za-z0-9À-ɏ _.\-]+$/.test(v)) return 'Usa solo lettere, numeri, spazio, punto, trattino o underscore.';
+    return '';
+  }
+  function showWelcome() {
+    var i = document.getElementById('wnick'), t = document.getElementById('wtitle'), tx = document.getElementById('wtext');
+    if (myName) {
+      t.textContent = 'Una novità!';
+      tx.textContent = 'Ora ogni giocatore ha un nickname e il tuo record entra in classifica da solo. Conferma il nome che avevi o cambialo.';
+      i.value = myName;
+    }
+    welcomeEl.hidden = false;
+    setTimeout(function () { i.focus(); }, 80);
+  }
+  function setNick(v) {
+    myName = v;
+    lsSet('snake.name', myName);
+    lsSet('snake.nickok', '1');
+    submitAllBests();
+  }
 
   /* ---------- Missioni (3 al giorno e 3 a settimana, uguali per tutti i telefoni) e serie di giorni ---------- */
   var MIS = [
@@ -596,10 +826,9 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
           m.p = m.n;
           m.d = true;
           stats[s[2]] = statVal(s[2]) + 1;
-          bannerText = s[3];
-          bannerSub = misText(m, s[1]);
-          bannerAt = performance.now();
-          SFX.bonus();
+          var rw = s[2] === 'wdone' ? GEM_WEEKLY : GEM_DAILY;
+          addGems(rw);
+          misDoneQ.push({ t: misText(m, s[1]), g: rw, w: s[2] === 'wdone' });
         }
       });
     });
@@ -772,15 +1001,26 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   var panel = $('panel'), panelKind = '', lbMode = mode;
   function escH(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function panelHead(title) { return '<div class="ph"><h2>' + title + '</h2><button class="chip" type="button" data-a="close">Chiudi</button></div>'; }
+  function skinCard(s) {
+    var ok = skinOk(s), cols = skinCols(s) || [C.snake, C['snake-head']], cur = s.id === activeSkin().id, cls = '', sub = '', dis = '';
+    if (s.price && !ok) {
+      var miss = s.price - wallet.gems;
+      if (buyArm === s.id) { cls = ' arm'; sub = '<span class="pr">Tocca ancora per comprarla: 💎 ' + s.price + '</span>'; }
+      else if (miss <= 0) { cls = ' can'; sub = '<span class="pr">Sblocca · 💎 ' + s.price + '</span>'; }
+      else { cls = ' lock'; dis = ' disabled'; sub = '<span class="pr">💎 ' + s.price + '</span> · ti mancano ' + miss; }
+    } else if (!ok) { cls = ' lock'; dis = ' disabled'; sub = s.need.t + ' (' + Math.min(statVal(s.need.k), s.need.n) + ' su ' + s.need.n + ')'; }
+    else sub = cur ? 'In uso' : 'Tocca per usarla';
+    return '<button class="skin' + (cur ? ' on' : '') + cls + '" type="button" data-a="skin" data-id="' + s.id + '"' + dis + '>' +
+      '<span class="sw' + (s.rainbow ? ' rb' : '') + '" style="--a:' + cols[0] + ';--b:' + (s.rainbow ? '#b292ff' : cols[1]) + (s.gl ? ';background:linear-gradient(90deg,' + skinGrad(s).join(',') + ')' : '') + '"></span>' +
+      '<b>' + escH(s.name) + '</b><small>' + sub + '</small></button>';
+  }
   function skinPanel() {
-    var h = panelHead('Skin') + '<div class="pb"><div class="skins">';
-    SKINS.forEach(function (s) {
-      var ok = skinOk(s), cols = skinCols(s) || [C.snake, C['snake-head']], cur = s.id === activeSkin().id;
-      h += '<button class="skin' + (cur ? ' on' : '') + (ok ? '' : ' lock') + '" type="button" data-a="skin" data-id="' + s.id + '"' + (ok ? '' : ' disabled') + '>' +
-        '<span class="sw' + (s.rainbow ? ' rb' : '') + '" style="--a:' + cols[0] + ';--b:' + (s.rainbow ? '#b292ff' : cols[1]) + (s.gl ? ';background:linear-gradient(90deg,' + skinGrad(s).join(',') + ')' : '') + '"></span>' +
-        '<b>' + s.name + '</b><small>' + (ok ? (cur ? 'In uso' : 'Tocca per usarla') : s.need.t + ' (' + Math.min(statVal(s.need.k), s.need.n) + ' su ' + s.need.n + ')') + '</small></button>';
-    });
-    return h + '</div><p class="pnote">Le skin si sbloccano giocando.</p></div>';
+    var h = panelHead('Skin') + '<div class="pb"><div class="gemrow"><span>💎 <b>' + wallet.gems + '</b> gemme</span><small>Le guadagni giocando, con le missioni e ogni giorno. Le spendi tu, sulla skin che vuoi.</small></div>';
+    h += '<h3 class="pt">Negozio</h3><div class="skins"><button class="skin' + (activeSkin().id === 'base' ? ' on' : '') + '" type="button" data-a="skin" data-id="base"><span class="sw" style="--a:' + C.snake + ';--b:' + C['snake-head'] + '"></span><b>Classico</b><small>' + (activeSkin().id === 'base' ? 'In uso' : 'Tocca per usarla') + '</small></button>';
+    shopList().forEach(function (s) { h += skinCard(s); });
+    h += '</div><h3 class="pt">Con le imprese</h3><div class="skins">';
+    SKINS.forEach(function (s) { if (!s.price && s.id !== 'base') h += skinCard(s); });
+    return h + '</div><p class="pnote">Le skin del negozio le compri con le gemme. Quelle con le imprese si sbloccano giocando.</p></div>';
   }
   function misBlock(title, set, pool) {
     var h = '<h3 class="pt">' + title + '</h3>';
@@ -844,15 +1084,24 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     if (!b) return;
     var a = b.getAttribute('data-a'), id = b.getAttribute('data-id');
     if (a === 'close') closePanel();
-    else if (a === 'skin') { var s = skinById(id); if (skinOk(s)) { skinId = id; lsSet('snake.skin', id); openPanel('skin'); } }
+    else if (a === 'skin') {
+      var s = skinById(id);
+      if (skinOk(s)) { skinId = id; lsSet('snake.skin', id); buyArm = ''; openPanel('skin'); }
+      else if (s.price && wallet.gems >= s.price) {
+        if (buyArm === id) buySkin(id, true);
+        else { buyArm = id; openPanel('skin'); }
+      }
+    }
     else if (a === 'lbmode') { lbMode = id; openPanel('lb'); }
     else if (a === 'savename') {
       var inp = document.getElementById('nick');
-      myName = String(inp ? inp.value : '').replace(/[\u0000-\u001F<>]/g, '').trim().slice(0, 14);
-      lsSet('snake.name', myName);
-      var note = document.getElementById('lbNote');
-      if (note) note.textContent = myName ? 'Nome salvato.' : 'Scegli un nome per comparire in classifica.';
-      if (myName) { submitAllBests(); setTimeout(fillLb, 900); }
+      var nv = cleanNick(inp ? inp.value : ''), ne = nickError(nv), note = document.getElementById('lbNote');
+      if (ne) { if (note) note.textContent = ne; }
+      else {
+        setNick(nv);
+        if (note) note.textContent = 'Nickname salvato.';
+        setTimeout(fillLb, 900);
+      }
     }
   });
 
@@ -988,6 +1237,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     endReason = '';
     newBest = false;
     newSkins = [];
+    lastGems = 0;
     best = bests[mode] || 0;
     placeFood();
     state = 'ready';
@@ -999,6 +1249,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     closePanel();
     snapOk = SKINS.map(skinOk);
     loadDaily();
+    holdAll();
     state = 'running';
     prog = 0;
     refreshUI();
@@ -1046,9 +1297,17 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       lsSet('snake.bests', JSON.stringify(bests));
     }
     pushLocal(mode, score, level);
+    lastGems = Math.floor(score / 10) + (newBest ? 5 : 0);
+    addGems(lastGems);
     saveStats();
     newSkins = [];
-    SKINS.forEach(function (s, i) { if (skinOk(s) && !snapOk[i]) newSkins.push(s.name); });
+    newSkinIds = [];
+    SKINS.forEach(function (s, i) { if (skinOk(s) && !snapOk[i]) { newSkins.push(s.name); newSkinIds.push(s.id); } });
+    newSkinIds.forEach(function (id) {
+      var sk = skinById(id);
+      notify({ icon: '🎨', title: 'Nuova skin: «' + sk.name + '»', text: 'Sbloccata con un’impresa. La vuoi usare subito?', actions: [{ label: 'Usala ora', pri: true, fn: function () { skinId = id; lsSet('snake.skin', id); } }] });
+    });
+    checkAfford();
     if (score > 0) submitScore(mode, score, level);
   }
 
@@ -1338,8 +1597,10 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     } else if (state === 'over') {
       ovTitle.textContent = endReason === 'time' ? 'Tempo scaduto!' : (won ? 'Hai vinto!' : 'Fine partita');
       ovSub.textContent = 'Livello ' + level + ', ' + score + ' punti. ' + (newBest ? 'Nuovo record!' : 'Record: ' + best + '.') +
-        (newSkins.length ? ' Nuova skin: ' + newSkins.join(', ') + '.' : '') + ' Tocca per rigiocare.';
+        (lastGems ? ' +' + lastGems + ' gemme.' : '') + (newSkins.length ? ' Nuova skin: ' + newSkins.join(', ') + '.' : '') + ' Tocca per rigiocare.';
     }
+    refreshGems();
+    scheduleEndNotifs();
   }
   function each4(list, fn) { for (var i = 0; i < list.length; i++) fn(list[i]); }
 
@@ -1541,14 +1802,22 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       bodyCol = gr;
       headCol = 'hsl(' + Math.round((t / 14 - 40 + 360) % 360) + ',85%,' + (isDark() ? 70 : 40) + '%)';
     }
-    if (sk.gl) {
+    if (sk.flow) {
+      var tl3 = pts[pts.length - 1], gx3 = tl3.x - pts[0].x, gy3 = tl3.y - pts[0].y, gl3 = Math.hypot(gx3, gy3) || 1, span3 = Math.max(gl3, c * 5);
+      var gr3 = ctx.createLinearGradient(pts[0].x, pts[0].y, pts[0].x + gx3 / gl3 * span3, pts[0].y + gy3 / gl3 * span3);
+      for (var gk = 0; gk <= 4; gk++) gr3.addColorStop(gk / 4, 'hsl(' + Math.round(sk.flow.h + sk.flow.r * Math.sin(t / 520 + gk * 1.15)) + ',82%,' + (isDark() ? 66 : 50) + '%)');
+      bodyCol = gr3;
+      headCol = 'hsl(' + Math.round(sk.flow.h + sk.flow.r * Math.sin(t / 520 - 0.8)) + ',82%,' + (isDark() ? 78 : 34) + '%)';
+    } else if (sk.gl) {
       var tl2 = pts[pts.length - 1], gx2 = tl2.x - pts[0].x, gy2 = tl2.y - pts[0].y, gl2 = Math.hypot(gx2, gy2) || 1, span2 = Math.max(gl2, c * 5), cs = skinGrad(sk);
       var gr2 = ctx.createLinearGradient(pts[0].x, pts[0].y, pts[0].x + gx2 / gl2 * span2, pts[0].y + gy2 / gl2 * span2);
       for (var gj = 0; gj < cs.length; gj++) gr2.addColorStop(gj / (cs.length - 1), cs[gj]);
       bodyCol = gr2;
     }
     ctx.strokeStyle = bodyCol;
+    if (sk.glow) { ctx.shadowColor = sk.glow; ctx.shadowBlur = c * 0.9; }
     for (j = 0; j < runs.length; j++) strokeRun(runs[j]);
+    ctx.shadowBlur = 0;
 
     // testa: gira piano insieme al corpo
     var hp = pts[0], fdx = dir.x, fdy = dir.y;
@@ -1672,7 +1941,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   var FOLLOW_R = 38, DEAD = 12, HOLD_MS = 110;
   var fAct = false, ax = 0, ay = 0, fx0 = 0, fy0 = 0, fMoved = false, fDir = '', steered = false, holdT = 0;
   var headX = 0, headY = 0;
-  function isUI(el) { return el && el.closest && el.closest('button, .pad, .panel, input'); }
+  function isUI(el) { return el && el.closest && el.closest('button, .pad, .panel, input, .notif, .welcome'); }
   function sgn(v, fallback) { return v > 0 ? 1 : (v < 0 ? -1 : fallback); }
 
   function touchSteer(cx, cy) {
@@ -1819,6 +2088,17 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     refreshUI();
   });
   skinBtn.addEventListener('click', function () { openPanel('skin'); });
+  $('gemPill').addEventListener('click', function () { openPanel('skin'); });
+  document.getElementById('wform').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = cleanNick(document.getElementById('wnick').value), er = nickError(v);
+    if (er) { document.getElementById('werr').textContent = er; return; }
+    setNick(v);
+    welcomeEl.hidden = true;
+    notify({ icon: '🐍', title: 'Ciao, ' + v + '!', text: 'Sei in classifica: il tuo record parte da solo a fine partita.', actions: [] });
+    loginCheck();
+  });
+  document.getElementById('wnick').addEventListener('input', function () { document.getElementById('werr').textContent = ''; });
   misBtn.addEventListener('click', function () { openPanel('mis'); });
   lbBtn.addEventListener('click', function () { lbMode = mode; openPanel('lb'); });
   (function buildModes() {
@@ -1879,6 +2159,11 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       setPower: function (ms) { powerUntil = gt + ms; },
       stepMonsters: function () { monstersStep(); },
       stats: function () { return JSON.parse(JSON.stringify(stats)); },
+      wallet: function () { return JSON.parse(JSON.stringify(wallet)); },
+      setWallet: function (o) { for (var k in o) wallet[k] = o[k]; saveWallet(); refreshGems(); },
+      notifs: function () { return { shown: notifCur ? notifCur.innerText : '', queued: notifQ.length, held: notifHold.length, mis: misDoneQ.length }; },
+      login: function () { loginCheck(); },
+      afford: function () { checkAfford(); },
       daily: function () { return JSON.parse(JSON.stringify(daily)); },
       weekly: function () { return JSON.parse(JSON.stringify(weekly)); },
       streak: function () { return curStreak(); },
@@ -1903,6 +2188,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   loadColors();
   document.body.classList.toggle('pad-on', padOn);
   reset();
+  if (FIREBASE_CONFIG && lsGet('snake.nickok', '0') !== '1') showWelcome(); else loginCheck();
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && welcomeEl.hidden) { loginCheck(); refreshUI(); } });
   requestAnimationFrame(frame);
 })();
 </script>
