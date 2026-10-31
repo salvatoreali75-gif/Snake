@@ -243,6 +243,45 @@ body.pad-on .pad { display: block; }
 .hint { display: none; flex: none; margin: 0; font-size: 0.82rem; color: var(--muted); text-align: center; }
 button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 
+.overlay { overflow-y: auto; justify-content: flex-start; touch-action: none; }
+.ovin { margin: auto; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.seg { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.chip {
+  font: inherit; font-size: 0.78rem; font-weight: 700; padding: 8px 12px; min-height: 38px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--btn); color: var(--ink); cursor: pointer; touch-action: manipulation; white-space: nowrap;
+}
+.btn.play { background: var(--snake); color: var(--board); border-color: var(--snake); font-size: 1rem; padding: 12px 34px; margin: 4px 0; }
+.chip.on { background: var(--snake); color: var(--board); border-color: var(--snake); }
+.chip:disabled { opacity: 0.45; cursor: default; }
+.mdesc { margin: 0; font-size: 0.8rem; color: var(--muted); text-align: center; max-width: 32ch; text-wrap: balance; }
+.panel { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; background: var(--board); touch-action: pan-y; text-align: left; }
+.panel[hidden] { display: none; }
+.ph { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px 8px; }
+.ph h2 { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; line-height: 1.1; }
+.pb { touch-action: pan-y; flex: 1; min-height: 0; overflow-y: auto; padding: 4px 16px 18px; display: flex; flex-direction: column; gap: 10px; -webkit-overflow-scrolling: touch; }
+.skins { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.skin { display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: 14px; border: 1px solid var(--line); background: var(--btn); text-align: left; font: inherit; color: var(--ink); cursor: pointer; touch-action: manipulation; }
+.skin.on { box-shadow: 0 0 0 2px var(--snake); }
+.skin.lock { opacity: 0.6; cursor: default; }
+.skin b { font-size: 0.9rem; }
+.skin small { font-size: 0.72rem; color: var(--muted); line-height: 1.25; }
+.sw { display: block; position: relative; height: 18px; margin-right: 14px; border-radius: 9px; background: var(--a); }
+.sw::after { content: ""; position: absolute; right: -14px; top: -3px; width: 24px; height: 24px; border-radius: 50%; background: var(--b); }
+.sw.rb { background: linear-gradient(90deg, #ff5e5e, #ffb347, #ffe94d, #4fd08f, #4fc3f7, #b292ff); }
+.mis { padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--btn); display: flex; flex-direction: column; gap: 6px; }
+.mis.done { border-color: var(--snake); }
+.mis small { color: var(--muted); font-size: 0.75rem; }
+.bar { height: 6px; border-radius: 3px; background: var(--grid); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--snake); }
+.lbrow { display: flex; gap: 10px; align-items: baseline; padding: 7px 4px; border-bottom: 1px solid var(--line); font-size: 0.9rem; }
+.lbrow.me { font-weight: 800; color: var(--snake); }
+.lbrow .n { width: 1.6em; color: var(--muted); font-family: var(--font-mono); }
+.lbrow .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lbrow .sc { font-family: var(--font-mono); }
+.nick { display: flex; gap: 8px; }
+.nick input { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--btn); color: var(--ink); -webkit-user-select: text; user-select: text; }
+.pnote { margin: 0; font-size: 0.78rem; color: var(--muted); }
+
 @media (pointer: fine) {
   body.pad-on .pad { display: none; }
   .hint { display: block; }
@@ -268,21 +307,32 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     <div class="board" id="board" aria-label="Griglia di gioco">
       <canvas id="cv"></canvas>
       <div class="overlay" id="overlay">
-        <p class="ov-title" id="ovTitle">Pronto?</p>
-        <p class="ov-sub" id="ovSub">Tocca lo schermo per iniziare</p>
-        <div class="legend" aria-hidden="true">
-          <span><i style="background:var(--food)"></i>Mela +10</span>
-          <span><i style="background:var(--bonus)"></i>Stella +50</span>
-          <span><i style="background:var(--slow)"></i>Rallenta</span>
-          <span><i style="background:var(--cut)"></i>Accorcia</span>
-          <span><i style="background:var(--monster)"></i>Mostri dal livello 5</span>
+        <div class="ovin">
+          <p class="ov-title" id="ovTitle">Pronto?</p>
+          <p class="ov-sub" id="ovSub">Tocca lo schermo per iniziare</p>
+          <button class="btn play" id="playBtn" type="button">Gioca</button>
+          <div class="seg" id="modeSeg"></div>
+          <p class="mdesc" id="modeDesc"></p>
+          <div class="ov-tools">
+            <button class="btn" id="skinBtn" type="button">Skin</button>
+            <button class="btn" id="misBtn" type="button">Missioni</button>
+            <button class="btn" id="lbBtn" type="button">Classifica</button>
+          </div>
+          <div class="ov-tools">
+            <button class="btn" id="musicBtn" type="button">Musica: sì</button>
+            <button class="btn" id="soundBtn" type="button">Effetti: sì</button>
+            <button class="btn" id="padBtn" type="button">Pad: no</button>
+            <button class="btn" id="fsBtn" type="button" hidden>Schermo intero</button>
+          </div>
+          <div class="legend" aria-hidden="true">
+            <span><i style="background:var(--food)"></i>Mela +10</span>
+            <span><i style="background:var(--bonus)"></i>Stella +50</span>
+            <span><i style="background:var(--slow)"></i>Rallenta</span>
+            <span><i style="background:var(--cut)"></i>Accorcia</span>
+            <span><i style="background:var(--monster)"></i>Mostri dal livello 5</span>
+          </div>
         </div>
-        <div class="ov-tools">
-          <button class="btn" id="wrapBtn" type="button">Bordi: muri</button>
-          <button class="btn" id="soundBtn" type="button">Suono: sì</button>
-          <button class="btn" id="padBtn" type="button">Pad: no</button>
-          <button class="btn" id="fsBtn" type="button" hidden>Schermo intero</button>
-        </div>
+        <div class="panel" id="panel" hidden></div>
       </div>
     </div>
   </div>
@@ -314,7 +364,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   var board = $('board'), canvas = $('cv'), ctx = canvas.getContext('2d', { alpha: false });
   var scoreEl = $('score'), bestEl = $('best'), levelEl = $('level');
   var overlay = $('overlay'), ovTitle = $('ovTitle'), ovSub = $('ovSub');
-  var pauseBtn = $('pauseBtn'), wrapBtn = $('wrapBtn'), soundBtn = $('soundBtn'), padBtn = $('padBtn'), fsBtn = $('fsBtn');
+  var pauseBtn = $('pauseBtn'), soundBtn = $('soundBtn'), musicBtn = $('musicBtn'), padBtn = $('padBtn'), fsBtn = $('fsBtn');
+  var playBtn = $('playBtn'), skinBtn = $('skinBtn'), misBtn = $('misBtn'), lbBtn = $('lbBtn'), modeSeg = $('modeSeg'), modeDesc = $('modeDesc');
   var rootEl = document.documentElement;
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -398,17 +449,348 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   var state = 'ready'; // ready | running | paused | over
   var prog = 0, alpha = 1, slowF = 1, mProg = 0, powerUntil = 0, gt = 0, overAt = 0, crashed = false, won = false, wrap = false, padOn = false;
   var slowUntil = 0, bannerAt = -9999, bannerText = '', bannerSub = '', shakeUntil = 0;
+  var timeLeft = 0, endReason = '', newBest = false, newSkins = [], snapOk = [];
   var particles = [], monsters = [], respawns = [];
   var MONSTER_SLOW = 1.9, MAX_MONSTERS = 3;
 
-  try {
-    best = parseInt(localStorage.getItem('snake.best') || '0', 10) || 0;
-    wrap = localStorage.getItem('snake.wrap') === '1';
-    muted = localStorage.getItem('snake.mute') === '1';
-    padOn = localStorage.getItem('snake.pad') === '1';
-  } catch (e) {}
+  /* ---------- Modalità, statistiche e preferenze ---------- */
+  var MODES = [
+    { id: 'classic', name: 'Classica', desc: 'Livelli, ostacoli e mostri. Contro i muri si perde.', wrap: false },
+    { id: 'timed', name: 'A tempo', desc: '90 secondi: ogni mela dà 2 secondi in più. Fai più punti che puoi.', wrap: false, time: 90000 },
+    { id: 'turbo', name: 'Turbo', desc: 'Niente ostacoli né mostri: la velocità cresce a ogni mela.', wrap: false },
+    { id: 'open', name: 'Senza muri', desc: 'I bordi sono aperti: esci da un lato e rientri dall\u2019altro.', wrap: true }
+  ];
+  function modeOf(id) { for (var i = 0; i < MODES.length; i++) if (MODES[i].id === id) return MODES[i]; return null; }
+  function lsGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function lsJson(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v && typeof v === 'object' ? v : d; } catch (e) { return d; } }
+  var mode = 'classic', skinId = 'base', musicOn = true, myName = '', stats = {}, bests = {};
+  (function loadPrefs() {
+    muted = lsGet('snake.mute', '0') === '1';
+    padOn = lsGet('snake.pad', '0') === '1';
+    musicOn = lsGet('snake.music', '1') !== '0';
+    skinId = lsGet('snake.skin', 'base');
+    myName = lsGet('snake.name', '');
+    stats = lsJson('snake.stats', {});
+    ['games', 'apples', 'stars', 'monsters', 'best', 'level', 'mdone'].forEach(function (k) { stats[k] = Number(stats[k]) || 0; });
+    bests = lsJson('snake.bests', {});
+    var old = parseInt(lsGet('snake.best', '0'), 10) || 0, oldWrap = lsGet('snake.wrap', '0') === '1';
+    if (old && bests.classic === undefined && bests.open === undefined) bests[oldWrap ? 'open' : 'classic'] = old;
+    mode = modeOf(lsGet('snake.mode', oldWrap ? 'open' : 'classic')) ? lsGet('snake.mode', oldWrap ? 'open' : 'classic') : 'classic';
+    best = bests[mode] || 0;
+    wrap = modeOf(mode).wrap;
+  })();
+  function saveStats() { lsSet('snake.stats', JSON.stringify(stats)); }
 
-  function baseTick() { return Math.max(72, 150 - (level - 1) * 9); }
+  function baseTick() {
+    if (mode === 'turbo') return Math.max(52, 140 - eaten * 3);
+    return Math.max(72, 150 - (level - 1) * 9);
+  }
+
+  /* ---------- Skin sbloccabili ---------- */
+  var SKINS = [
+    { id: 'base', name: 'Classico', need: null },
+    { id: 'smeraldo', name: 'Smeraldo', need: { k: 'games', n: 3, t: 'Gioca 3 partite' }, light: ['#1E8A5A', '#0F5A3A'], dark: ['#4FD08F', '#B6F5D3'] },
+    { id: 'corallo', name: 'Corallo', need: { k: 'best', n: 100, t: 'Fai 100 punti in una partita' }, light: ['#D9573F', '#8F2C1B'], dark: ['#FF8A70', '#FFD0C4'] },
+    { id: 'viola', name: 'Viola', need: { k: 'apples', n: 60, t: 'Mangia 60 mele in tutto' }, light: ['#7C4DDB', '#4B2A99'], dark: ['#B292FF', '#E4D8FF'] },
+    { id: 'oro', name: 'Oro', need: { k: 'level', n: 6, t: 'Arriva al livello 6' }, light: ['#D79A12', '#8F6200'], dark: ['#F5B83D', '#FFE29A'] },
+    { id: 'ghiaccio', name: 'Ghiaccio', need: { k: 'best', n: 300, t: 'Fai 300 punti in una partita' }, light: ['#2A9DB5', '#16667A'], dark: ['#6FDDF2', '#D3F7FF'] },
+    { id: 'notte', name: 'Notte', need: { k: 'games', n: 25, t: 'Gioca 25 partite' }, light: ['#33404D', '#0F1720'], dark: ['#8FA3B5', '#FFFFFF'] },
+    { id: 'rainbow', name: 'Arcobaleno', need: { k: 'mdone', n: 5, t: 'Completa 5 missioni' }, rainbow: true }
+  ];
+  function isDark() {
+    var t = document.documentElement.getAttribute('data-theme');
+    if (t) return t === 'dark';
+    return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+  function skinById(id) {
+    for (var i = 0; i < SKINS.length; i++) if (SKINS[i].id === id) return SKINS[i];
+    return SKINS[0];
+  }
+  function statVal(k) { return Number(stats[k]) || 0; }
+  function skinOk(s) { return !s.need || statVal(s.need.k) >= s.need.n; }
+  function skinCols(s) { return s.light ? (isDark() ? s.dark : s.light) : null; }
+  function activeSkin() { var s = skinById(skinId); return skinOk(s) ? s : SKINS[0]; }
+
+  /* ---------- Missioni giornaliere (3 al giorno, uguali per tutti i telefoni) ---------- */
+  var MIS = [
+    { k: 'apples', t: 'Mangia {n} mele', n: [15, 30, 50], acc: true },
+    { k: 'score', t: 'Fai {n} punti in una partita', n: [80, 150, 250] },
+    { k: 'level', t: 'Arriva al livello {n}', n: [3, 5, 7] },
+    { k: 'stars', t: 'Prendi {n} stelle viola', n: [1, 2, 3], acc: true },
+    { k: 'games', t: 'Gioca {n} partite', n: [3, 5, 8], acc: true },
+    { k: 'monsters', t: 'Mangia {n} mostri col Potere', n: [1, 2, 3], acc: true },
+    { k: 'timed', t: 'Fai {n} punti in modalità A tempo', n: [60, 120, 200] }
+  ];
+  var daily = null;
+  function todayKey() {
+    var d = new Date(), z = function (v) { return (v < 10 ? '0' : '') + v; };
+    return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate());
+  }
+  function rng(seed) {
+    return function () {
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function makeDaily() {
+    var key = todayKey(), r = rng(parseInt(key.replace(/-/g, ''), 10)), pool = MIS.slice(), out = [];
+    while (out.length < 3 && pool.length) {
+      var m = pool.splice(Math.floor(r() * pool.length), 1)[0];
+      out.push({ k: m.k, n: m.n[Math.floor(r() * 3)], p: 0, d: false });
+    }
+    return { date: key, m: out };
+  }
+  function saveDaily() { lsSet('snake.daily', JSON.stringify(daily)); }
+  function loadDaily() {
+    var d = lsJson('snake.daily', null);
+    if (!d || d.date !== todayKey() || !Array.isArray(d.m) || d.m.length !== 3) { d = makeDaily(); daily = d; saveDaily(); }
+    daily = d;
+  }
+  function misDef(k) { for (var i = 0; i < MIS.length; i++) if (MIS[i].k === k) return MIS[i]; return MIS[0]; }
+  function misText(m) { return misDef(m.k).t.replace('{n}', m.n); }
+  function missionEvent(k, amount, absolute) {
+    if (!daily || daily.date !== todayKey()) loadDaily();
+    var changed = false;
+    daily.m.forEach(function (m) {
+      if (m.k !== k || m.d) return;
+      m.p = absolute ? Math.max(m.p, amount) : m.p + amount;
+      changed = true;
+      if (m.p >= m.n) {
+        m.p = m.n;
+        m.d = true;
+        stats.mdone = statVal('mdone') + 1;
+        bannerText = 'Missione compiuta!';
+        bannerSub = misText(m);
+        bannerAt = performance.now();
+        SFX.bonus();
+      }
+    });
+    if (changed) saveDaily();
+  }
+
+  /* ---------- Musica di sottofondo (generata nel gioco, volume basso) ---------- */
+  var MUSIC_VOL = 0.2, mgain = null, mtimer = null, mnext = 0, mstep = 0;
+  // Otto battute in La minore: Am F C G Am F Dm E
+  var CH = [{ r: 57, t: 3 }, { r: 53, t: 4 }, { r: 60, t: 4 }, { r: 55, t: 4 }, { r: 57, t: 3 }, { r: 53, t: 4 }, { r: 50, t: 3 }, { r: 52, t: 4 }];
+  var ARP = [0, 2, 1, 2, 3, 2, 1, 2];
+  var LEAD = [
+    [76, 0, 0, 72, 0, 74, 0, 0], [72, 0, 0, 69, 0, 72, 0, 0], [79, 0, 76, 0, 72, 0, 76, 0], [74, 0, 0, 71, 0, 74, 0, 0],
+    [76, 0, 79, 0, 76, 0, 72, 0], [77, 0, 72, 0, 69, 0, 72, 0], [74, 0, 77, 0, 74, 0, 69, 0], [76, 0, 0, 80, 0, 76, 0, 71]
+  ];
+  function mtof(n) { return 440 * Math.pow(2, (n - 69) / 12); }
+  function mnote(ctx, dest, freq, when, dur, type, vol) {
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.exponentialRampToValueAtTime(vol, when + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+    o.connect(g);
+    g.connect(dest);
+    o.start(when);
+    o.stop(when + dur + 0.05);
+  }
+  function mpad(ctx, dest, freq, when, dur, vol) {
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.exponentialRampToValueAtTime(vol, when + 0.6);
+    g.gain.setValueAtTime(vol, when + dur - 0.7);
+    g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+    o.connect(g);
+    g.connect(dest);
+    o.start(when);
+    o.stop(when + dur + 0.05);
+  }
+  function mhat(ctx, dest, when) {
+    if (!ctx.__nb) {
+      var b = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.08), ctx.sampleRate), d = b.getChannelData(0);
+      for (var i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+      ctx.__nb = b;
+    }
+    var s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    s.buffer = ctx.__nb;
+    f.type = 'highpass';
+    f.frequency.value = 6500;
+    g.gain.value = 0.09;
+    s.connect(f);
+    f.connect(g);
+    g.connect(dest);
+    s.start(when);
+  }
+  function mstepSched(ctx, dest, n, when, bpm) {
+    var bar = Math.floor(n / 8) % 8, pos = n % 8, ch = CH[bar], sec = 30 / bpm;
+    if (pos === 0) {
+      mpad(ctx, dest, mtof(ch.r), when, sec * 8, 0.07);
+      mpad(ctx, dest, mtof(ch.r + ch.t), when, sec * 8, 0.06);
+      mpad(ctx, dest, mtof(ch.r + 7), when, sec * 8, 0.06);
+    }
+    if (pos === 0 || pos === 4 || (pos === 6 && bar % 2)) mnote(ctx, dest, mtof(36 + (ch.r % 12)), when, sec * 1.9, 'triangle', 0.42);
+    mnote(ctx, dest, mtof(ch.r + [0, ch.t, 7, 12][ARP[pos]]), when, sec * 1.3, 'triangle', 0.17);
+    if (LEAD[bar][pos]) mnote(ctx, dest, mtof(LEAD[bar][pos]), when, sec * 2.6, 'sine', 0.26);
+    if (pos % 2) mhat(ctx, dest, when);
+  }
+  function bpmNow() { return mode === 'turbo' ? 96 + Math.min(30, eaten) : 94 + Math.min(30, (level - 1) * 4); }
+  function musicTick() {
+    if (!actx || !mgain) return;
+    if (mnext < actx.currentTime - 0.2) mnext = actx.currentTime + 0.05;
+    while (mnext < actx.currentTime + 0.4) {
+      var bpm = bpmNow();
+      mstepSched(actx, mgain, mstep, mnext, bpm);
+      mnext += 30 / bpm;
+      mstep++;
+    }
+  }
+  function musicStart() {
+    if (!musicOn || !actx) return;
+    try {
+      if (!mgain) { mgain = actx.createGain(); mgain.gain.value = 0; mgain.connect(actx.destination); }
+      var t = actx.currentTime;
+      mgain.gain.cancelScheduledValues(t);
+      mgain.gain.setTargetAtTime(MUSIC_VOL, t, 0.25);
+      if (!mtimer) { mnext = t + 0.08; mtimer = setInterval(musicTick, 100); }
+    } catch (e) {}
+  }
+  function musicStop() {
+    try {
+      if (mgain && actx) { var t = actx.currentTime; mgain.gain.cancelScheduledValues(t); mgain.gain.setTargetAtTime(0, t, 0.12); }
+    } catch (e) {}
+    if (mtimer) { clearInterval(mtimer); mtimer = null; }
+  }
+
+  /* ---------- Classifica online (Firebase, progetto separato) ---------- */
+  // Finché qui sotto c'è null la classifica online resta spenta e il gioco funziona normalmente.
+  var FIREBASE_CONFIG = null;
+  var fbP = null;
+  function fbReady() {
+    if (!FIREBASE_CONFIG) return Promise.reject(new Error('off'));
+    if (fbP) return fbP;
+    var B = 'https://www.gstatic.com/firebasejs/10.12.2/';
+    fbP = Promise.all([import(B + 'firebase-app.js'), import(B + 'firebase-auth.js'), import(B + 'firebase-firestore.js')]).then(function (m) {
+      var app = m[0].initializeApp(FIREBASE_CONFIG), auth = m[1].getAuth(app), fs = m[2].getFirestore(app);
+      return m[1].signInAnonymously(auth).then(function (cred) {
+        return { fs: fs, m: m[2], uid: (cred && cred.user) ? cred.user.uid : auth.currentUser.uid };
+      });
+    });
+    fbP.catch(function () { fbP = null; });
+    return fbP;
+  }
+  function submitScore(mid, sc, lvl) {
+    if (!FIREBASE_CONFIG || !myName || !sc) return;
+    fbReady().then(function (f) {
+      var ref = f.m.doc(f.fs, 'modes/' + mid + '/scores/' + f.uid);
+      return f.m.getDoc(ref).then(function (s) {
+        var old = s.exists() ? (Number(s.data().score) || 0) : 0;
+        if (s.exists() && old >= sc && s.data().name === myName) return null;
+        return f.m.setDoc(ref, { name: myName, score: Math.max(sc, old), level: lvl, at: f.m.serverTimestamp() });
+      });
+    }).catch(function () {});
+  }
+  function submitAllBests() {
+    MODES.forEach(function (m) { if (bests[m.id] > 0) submitScore(m.id, bests[m.id], 1); });
+  }
+  function loadTop(mid) {
+    return fbReady().then(function (f) {
+      var q = f.m.query(f.m.collection(f.fs, 'modes/' + mid + '/scores'), f.m.orderBy('score', 'desc'), f.m.limit(10));
+      return f.m.getDocs(q).then(function (snap) {
+        var out = [];
+        snap.forEach(function (d) { var v = d.data(); out.push({ name: String(v.name || '?'), score: Number(v.score) || 0, me: d.id === f.uid }); });
+        return out;
+      });
+    });
+  }
+  function pushLocal(mid, sc, lvl) {
+    var list = lsJson('snake.local.' + mid, []);
+    if (!Array.isArray(list)) list = [];
+    list.push({ s: sc, l: lvl, d: Date.now() });
+    list.sort(function (a, b) { return b.s - a.s; });
+    lsSet('snake.local.' + mid, JSON.stringify(list.slice(0, 5)));
+  }
+
+  /* ---------- Schede: skin, missioni, classifica ---------- */
+  var panel = $('panel'), panelKind = '', lbMode = mode;
+  function escH(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function panelHead(title) { return '<div class="ph"><h2>' + title + '</h2><button class="chip" type="button" data-a="close">Chiudi</button></div>'; }
+  function skinPanel() {
+    var h = panelHead('Skin') + '<div class="pb"><div class="skins">';
+    SKINS.forEach(function (s) {
+      var ok = skinOk(s), cols = skinCols(s) || [C.snake, C['snake-head']], cur = s.id === activeSkin().id;
+      h += '<button class="skin' + (cur ? ' on' : '') + (ok ? '' : ' lock') + '" type="button" data-a="skin" data-id="' + s.id + '"' + (ok ? '' : ' disabled') + '>' +
+        '<span class="sw' + (s.rainbow ? ' rb' : '') + '" style="--a:' + cols[0] + ';--b:' + (s.rainbow ? '#b292ff' : cols[1]) + '"></span>' +
+        '<b>' + s.name + '</b><small>' + (ok ? (cur ? 'In uso' : 'Tocca per usarla') : s.need.t + ' (' + Math.min(statVal(s.need.k), s.need.n) + ' su ' + s.need.n + ')') + '</small></button>';
+    });
+    return h + '</div><p class="pnote">Le skin si sbloccano giocando.</p></div>';
+  }
+  function misPanel() {
+    if (!daily || daily.date !== todayKey()) loadDaily();
+    var h = panelHead('Missioni di oggi') + '<div class="pb">';
+    daily.m.forEach(function (m) {
+      h += '<div class="mis' + (m.d ? ' done' : '') + '"><b>' + escH(misText(m)) + '</b><div class="bar"><i style="width:' + Math.min(100, Math.round(m.p / m.n * 100)) + '%"></i></div><small>' + (m.d ? 'Completata' : m.p + ' su ' + m.n) + '</small></div>';
+    });
+    return h + '<p class="pnote">Le missioni cambiano ogni giorno. Completate in tutto: ' + statVal('mdone') + '. Con 5 missioni sblocchi la skin Arcobaleno.</p></div>';
+  }
+  function lbChips() {
+    return '<div class="seg">' + MODES.map(function (m) { return '<button class="chip' + (m.id === lbMode ? ' on' : '') + '" type="button" data-a="lbmode" data-id="' + m.id + '">' + m.name + '</button>'; }).join('') + '</div>';
+  }
+  function lbPanel() {
+    var h = panelHead('Classifica') + '<div class="pb">' + lbChips();
+    if (FIREBASE_CONFIG) {
+      h += '<div class="nick"><input id="nick" type="text" maxlength="14" autocomplete="off" placeholder="Il tuo nome" value="' + escH(myName) + '"><button class="chip" type="button" data-a="savename">Salva</button></div>' +
+        '<div id="lbList"><p class="pnote">Carico…</p></div>' +
+        '<p class="pnote" id="lbNote">' + (myName ? 'A fine partita il tuo punteggio migliore parte da solo.' : 'Scegli un nome per comparire in classifica.') + '</p>';
+    } else {
+      var list = lsJson('snake.local.' + lbMode, []);
+      h += '<div id="lbList">';
+      if (!Array.isArray(list) || !list.length) h += '<p class="pnote">Nessuna partita ancora in questa modalità.</p>';
+      else list.forEach(function (e, i) {
+        var d = new Date(e.d);
+        h += '<div class="lbrow"><span class="n">' + (i + 1) + '</span><span class="nm">' + d.getDate() + '/' + (d.getMonth() + 1) + ' · livello ' + (e.l || 1) + '</span><span class="sc">' + e.s + '</span></div>';
+      });
+      h += '</div><p class="pnote">La classifica online non è ancora attiva: qui vedi i tuoi cinque migliori punteggi.</p>';
+    }
+    return h + '</div>';
+  }
+  function fillLb() {
+    var el = document.getElementById('lbList'), mid = lbMode;
+    if (!FIREBASE_CONFIG || !el) return;
+    loadTop(mid).then(function (rows) {
+      var e2 = document.getElementById('lbList');
+      if (panelKind !== 'lb' || lbMode !== mid || !e2) return;
+      e2.innerHTML = rows.length ? rows.map(function (r, i) {
+        return '<div class="lbrow' + (r.me ? ' me' : '') + '"><span class="n">' + (i + 1) + '</span><span class="nm">' + escH(r.name) + '</span><span class="sc">' + r.score + '</span></div>';
+      }).join('') : '<p class="pnote">Ancora nessun punteggio: sii il primo.</p>';
+    }).catch(function () {
+      var e2 = document.getElementById('lbList');
+      if (panelKind === 'lb' && e2) e2.innerHTML = '<p class="pnote">Non riesco a caricare la classifica. Controlla la connessione.</p>';
+    });
+  }
+  function openPanel(kind) {
+    panelKind = kind;
+    panel.innerHTML = kind === 'skin' ? skinPanel() : (kind === 'mis' ? misPanel() : lbPanel());
+    panel.hidden = false;
+    if (kind === 'lb') fillLb();
+  }
+  function closePanel() { panelKind = ''; panel.hidden = true; panel.innerHTML = ''; }
+  panel.addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('[data-a]') : null;
+    if (!b) return;
+    var a = b.getAttribute('data-a'), id = b.getAttribute('data-id');
+    if (a === 'close') closePanel();
+    else if (a === 'skin') { var s = skinById(id); if (skinOk(s)) { skinId = id; lsSet('snake.skin', id); openPanel('skin'); } }
+    else if (a === 'lbmode') { lbMode = id; openPanel('lb'); }
+    else if (a === 'savename') {
+      var inp = document.getElementById('nick');
+      myName = String(inp ? inp.value : '').replace(/[\u0000-\u001F<>]/g, '').trim().slice(0, 14);
+      lsSet('snake.name', myName);
+      var note = document.getElementById('lbNote');
+      if (note) note.textContent = myName ? 'Nome salvato.' : 'Scegli un nome per comparire in classifica.';
+      if (myName) { submitAllBests(); setTimeout(fillLb, 900); }
+    }
+  });
 
   /* ---------- Griglia a misura di schermo ---------- */
   function computeGrid() {
@@ -537,6 +919,12 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     shakeUntil = 0;
     crashed = false;
     won = false;
+    wrap = modeOf(mode).wrap;
+    timeLeft = modeOf(mode).time || 0;
+    endReason = '';
+    newBest = false;
+    newSkins = [];
+    best = bests[mode] || 0;
     placeFood();
     state = 'ready';
     refreshUI();
@@ -544,19 +932,27 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 
   function start() {
     audio();
+    closePanel();
+    snapOk = SKINS.map(skinOk);
+    loadDaily();
     state = 'running';
     prog = 0;
     refreshUI();
+    musicStart();
   }
   function pause() {
     if (state !== 'running') return;
     state = 'paused';
+    saveStats();
+    musicStop();
     refreshUI();
   }
   function resume() {
     if (state !== 'paused') return;
+    closePanel();
     state = 'running';
     refreshUI();
+    musicStart();
   }
 
   function burst(cx, cy, color, n, speed) {
@@ -570,22 +966,44 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     particles.push({ x: cx, y: cy, vx: 0, vy: -0.0021, life: 0, max: 900, color: color, text: text });
   }
 
-  function gameOver(didWin) {
+  function recordGame() {
+    stats.games++;
+    if (score > stats.best) stats.best = score;
+    if (level > stats.level) stats.level = level;
+    missionEvent('games', 1);
+    missionEvent('score', score, true);
+    missionEvent('level', level, true);
+    if (mode === 'timed') missionEvent('timed', score, true);
+    newBest = score > 0 && score > (bests[mode] || 0);
+    if (newBest) {
+      bests[mode] = score;
+      best = score;
+      lsSet('snake.bests', JSON.stringify(bests));
+    }
+    pushLocal(mode, score, level);
+    saveStats();
+    newSkins = [];
+    SKINS.forEach(function (s, i) { if (skinOk(s) && !snapOk[i]) newSkins.push(s.name); });
+    if (score > 0) submitScore(mode, score, level);
+  }
+
+  function gameOver(didWin, reason) {
     state = 'over';
     won = !!didWin;
-    crashed = !didWin;
+    endReason = reason || '';
+    crashed = !didWin && endReason !== 'time';
     overAt = performance.now();
     alpha = 1;
-    if (score > best) {
-      best = score;
-      try { localStorage.setItem('snake.best', String(best)); } catch (e) {}
-    }
-    if (!didWin) {
+    musicStop();
+    recordGame();
+    if (crashed) {
       var h = snake[0];
       burst(h.x + 0.5, h.y + 0.5, C.danger, 18, 0.006);
       if (!reduceMotion) shakeUntil = performance.now() + 320;
       SFX.die();
       buzz(70);
+    } else if (endReason === 'time') {
+      SFX.level();
     }
     refreshUI();
   }
@@ -617,11 +1035,13 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   function levelUp() {
     level++;
     bannerText = 'Livello ' + level;
-    bannerSub = level === 5 ? 'Arrivano i mostri!' : '';
+    bannerSub = (level === 5 && mode !== 'turbo') ? 'Arrivano i mostri!' : '';
     bannerAt = performance.now();
     SFX.level();
-    if (level >= 2) addObstacles(2);
-    syncMonsters();
+    if (mode !== 'turbo') {
+      if (level >= 2) addObstacles(2);
+      syncMonsters();
+    }
   }
 
   /* ---------- Mostri: dal livello 5 ti cercano; con la stella puoi mangiarli ---------- */
@@ -641,7 +1061,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     return true;
   }
   function syncMonsters() {
-    var want = level >= 5 ? Math.min(MAX_MONSTERS, 1 + Math.floor((level - 5) / 2)) : 0;
+    var want = (level >= 5 && mode !== 'turbo') ? Math.min(MAX_MONSTERS, 1 + Math.floor((level - 5) / 2)) : 0;
     while (monsters.length + respawns.length < want) { if (!spawnMonster()) break; }
   }
   function respawnTick() {
@@ -654,6 +1074,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     monsters.splice(i, 1);
     respawns.push(gt + 5000);
     score += 100;
+    stats.monsters++;
+    missionEvent('monsters', 1);
     burst(m.x + 0.5, m.y + 0.5, C.monster, 16, 0.0075);
     floatText(m.x + 0.5, m.y + 0.2, '+100', C.monster);
     SFX.bonus();
@@ -774,6 +1196,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       special = null;
       if (sp.type === 'gold') {
         score += 50;
+        stats.stars++;
+        missionEvent('stars', 1);
         powerUntil = gt + 5000;
         burst(hx + 0.5, hy + 0.5, C.bonus, 16, 0.0075);
         floatText(hx + 0.5, hy + 0.2, '+50', C.bonus);
@@ -800,6 +1224,9 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     if (eatingFood) {
       score += 10;
       eaten++;
+      stats.apples++;
+      missionEvent('apples', 1);
+      if (modeOf(mode).time) timeLeft = Math.min(timeLeft + 2000, 150000);
       burst(hx + 0.5, hy + 0.5, C.food, 10, 0.0055);
       floatText(hx + 0.5, hy + 0.2, '+10', C.food);
       SFX.eat();
@@ -812,18 +1239,29 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     }
   }
 
+  function fmtTime(ms) {
+    var s = Math.max(0, Math.ceil(ms / 1000));
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
   function refreshUI() {
     scoreEl.textContent = score;
     bestEl.textContent = Math.max(best, score);
     levelEl.textContent = level;
     pauseBtn.disabled = state !== 'running';
     var idle = state === 'ready' || state === 'over';
-    wrapBtn.disabled = !idle;
     padBtn.disabled = !idle;
-    wrapBtn.textContent = wrap ? 'Bordi: aperti' : 'Bordi: muri';
-    soundBtn.textContent = muted ? 'Suono: no' : 'Suono: sì';
+    soundBtn.textContent = muted ? 'Effetti: no' : 'Effetti: sì';
+    musicBtn.textContent = musicOn ? 'Musica: sì' : 'Musica: no';
     padBtn.textContent = padOn ? 'Pad: sì' : 'Pad: no';
+    each4(modeSeg.children, function (b) {
+      var on = b.getAttribute('data-mode') === mode;
+      b.classList.toggle('on', on);
+      b.disabled = !idle;
+    });
+    modeDesc.textContent = modeOf(mode).desc;
     overlay.hidden = state === 'running';
+    overlay.style.touchAction = overlay.scrollHeight > overlay.clientHeight + 2 ? 'pan-y' : 'none';
+    playBtn.textContent = state === 'paused' ? 'Riprendi' : (state === 'over' ? 'Rigioca' : 'Gioca');
     if (state === 'ready') {
       ovTitle.textContent = 'Pronto?';
       ovSub.textContent = 'Tocca lo schermo per iniziare. Tocca dove vuoi andare, o scorri il dito';
@@ -831,11 +1269,12 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       ovTitle.textContent = 'In pausa';
       ovSub.textContent = 'Tocca lo schermo per riprendere';
     } else if (state === 'over') {
-      ovTitle.textContent = won ? 'Hai vinto!' : 'Fine partita';
-      var extra = score >= best && score > 0 ? 'Nuovo record!' : 'Record: ' + best;
-      ovSub.textContent = 'Livello ' + level + ', ' + score + ' punti. ' + extra + ' Tocca per rigiocare.';
+      ovTitle.textContent = endReason === 'time' ? 'Tempo scaduto!' : (won ? 'Hai vinto!' : 'Fine partita');
+      ovSub.textContent = 'Livello ' + level + ', ' + score + ' punti. ' + (newBest ? 'Nuovo record!' : 'Record: ' + best + '.') +
+        (newSkins.length ? ' Nuova skin: ' + newSkins.join(', ') + '.' : '') + ' Tocca per rigiocare.';
     }
   }
+  function each4(list, fn) { for (var i = 0; i < list.length; i++) fn(list[i]); }
 
   /* ---------- Disegno ---------- */
   function rr(x, y, w, h, r) {
@@ -1027,7 +1466,15 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     ctx.strokeStyle = 'rgba(10, 25, 40, 0.16)';
     for (j = 0; j < runs.length; j++) strokeRun(runs[j]);
     ctx.restore();
-    ctx.strokeStyle = C.snake;
+    var sk = activeSkin(), scol = skinCols(sk), bodyCol = scol ? scol[0] : C.snake, headCol = scol ? scol[1] : C['snake-head'];
+    if (sk.rainbow) {
+      var tl = pts[pts.length - 1], gx = tl.x - pts[0].x, gy = tl.y - pts[0].y, gl = Math.hypot(gx, gy) || 1, span = Math.max(gl, c * 5);
+      var gr = ctx.createLinearGradient(pts[0].x, pts[0].y, pts[0].x + gx / gl * span, pts[0].y + gy / gl * span);
+      for (var gi = 0; gi <= 4; gi++) gr.addColorStop(gi / 4, 'hsl(' + Math.round((t / 14 + gi * 70) % 360) + ',85%,' + (isDark() ? 62 : 52) + '%)');
+      bodyCol = gr;
+      headCol = 'hsl(' + Math.round((t / 14 - 40 + 360) % 360) + ',85%,' + (isDark() ? 70 : 40) + '%)';
+    }
+    ctx.strokeStyle = bodyCol;
     for (j = 0; j < runs.length; j++) strokeRun(runs[j]);
 
     // testa: gira piano insieme al corpo
@@ -1038,7 +1485,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     }
     headX = hp.x;
     headY = hp.y;
-    ctx.fillStyle = crashed ? C.danger : C['snake-head'];
+    ctx.fillStyle = crashed ? C.danger : headCol;
     ctx.beginPath();
     ctx.arc(hp.x, hp.y, c * 0.42, 0, Math.PI * 2);
     ctx.fill();
@@ -1079,6 +1526,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     var row = 0;
     if (slowUntil > gt && state !== 'ready') drawPill('Rallentato ' + Math.ceil((slowUntil - gt) / 1000) + 's', C.slow, row++);
     if (powerUntil > gt && state !== 'ready') drawPill('Potere ' + Math.ceil((powerUntil - gt) / 1000) + 's', C.bonus, row++);
+    if (modeOf(mode).time && state !== 'ready') drawPill('Tempo ' + fmtTime(timeLeft), timeLeft < 10000 ? C.danger : C.snake, row++);
 
     // banner di livello
     var bt = t - bannerAt;
@@ -1111,6 +1559,10 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     lastFrame = t;
     if (state === 'running') {
       gt += dt;
+      if (modeOf(mode).time) {
+        timeLeft -= dt;
+        if (timeLeft <= 0) { timeLeft = 0; gameOver(false, 'time'); }
+      }
       // la velocità cambia in modo dolce, e l'avanzamento è un numero continuo: niente scatti quando cambia livello o effetto
       slowF += ((slowUntil > gt ? 1.65 : 1) - slowF) * Math.min(1, dt / 200);
       var tm = baseTick() * slowF;
@@ -1147,7 +1599,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   var FOLLOW_R = 38, DEAD = 12, HOLD_MS = 110;
   var fAct = false, ax = 0, ay = 0, fx0 = 0, fy0 = 0, fMoved = false, fDir = '', steered = false, holdT = 0;
   var headX = 0, headY = 0;
-  function isUI(el) { return el && el.closest && el.closest('button, .pad'); }
+  function isUI(el) { return el && el.closest && el.closest('button, .pad, .panel, input'); }
   function sgn(v, fallback) { return v > 0 ? 1 : (v < 0 ? -1 : fallback); }
 
   function touchSteer(cx, cy) {
@@ -1164,9 +1616,13 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     setDir(nx, ny);
   }
 
+  var fSoft = false;
   document.addEventListener('pointerdown', function (e) {
-    if (isUI(e.target)) return;
-    e.preventDefault();
+    var ui = isUI(e.target);
+    // nei menu uno swipe che parte anche sopra un pulsante fa partire la partita; il semplice tocco resta del pulsante
+    fSoft = !!ui && (state === 'ready' || state === 'over') && !(e.target.closest && e.target.closest('.panel, input, .pad'));
+    if (ui && !fSoft) return;
+    if (!fSoft) e.preventDefault();
     fAct = true;
     fMoved = false;
     steered = false;
@@ -1174,10 +1630,12 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     ax = fx0 = e.clientX;
     ay = fy0 = e.clientY;
     clearTimeout(holdT);
-    holdT = setTimeout(function () {             // dito appoggiato: si sterza subito, senza aspettare che lo alzi
-      if (fAct && !fMoved && (state === 'running' || state === 'ready')) { steered = true; touchSteer(fx0, fy0); }
-    }, HOLD_MS);
-    try { document.body.setPointerCapture(e.pointerId); } catch (err) {}
+    if (!fSoft) {
+      holdT = setTimeout(function () {           // dito appoggiato: si sterza subito, senza aspettare che lo alzi
+        if (fAct && !fMoved && (state === 'running' || state === 'ready')) { steered = true; touchSteer(fx0, fy0); }
+      }, HOLD_MS);
+      try { document.body.setPointerCapture(e.pointerId); } catch (err) {}
+    }
   });
   document.addEventListener('pointermove', function (e) {
     if (!fAct) return;
@@ -1205,7 +1663,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     if (!fAct) return;
     fAct = false;
     clearTimeout(holdT);
-    if (e.type === 'pointerup' && !fMoved && !steered && Math.hypot(e.clientX - fx0, e.clientY - fy0) < 10) {
+    if (!fSoft && e.type === 'pointerup' && !fMoved && !steered && Math.hypot(e.clientX - fx0, e.clientY - fy0) < 10) {
       if (state === 'paused' || state === 'over') primary();
       else touchSteer(e.clientX, e.clientY);
     }
@@ -1262,18 +1720,34 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   pauseBtn.addEventListener('click', function () {
     if (state === 'running') pause();
   });
-  wrapBtn.addEventListener('click', function () {
-    wrap = !wrap;
-    try { localStorage.setItem('snake.wrap', wrap ? '1' : '0'); } catch (e) {}
-    refreshUI();
-  });
   soundBtn.addEventListener('click', function () {
     muted = !muted;
-    try { localStorage.setItem('snake.mute', muted ? '1' : '0'); } catch (e) {}
+    lsSet('snake.mute', muted ? '1' : '0');
     audio();
     if (!muted) SFX.eat();
     refreshUI();
   });
+  musicBtn.addEventListener('click', function () {
+    musicOn = !musicOn;
+    lsSet('snake.music', musicOn ? '1' : '0');
+    audio();
+    if (musicOn && state === 'running') musicStart(); else musicStop();
+    refreshUI();
+  });
+  playBtn.addEventListener('click', function () { primary(); });
+  skinBtn.addEventListener('click', function () { openPanel('skin'); });
+  misBtn.addEventListener('click', function () { openPanel('mis'); });
+  lbBtn.addEventListener('click', function () { lbMode = mode; openPanel('lb'); });
+  (function buildModes() {
+    modeSeg.innerHTML = MODES.map(function (m) { return '<button class="chip" type="button" data-mode="' + m.id + '">' + m.name + '</button>'; }).join('');
+    modeSeg.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-mode]') : null;
+      if (!b || b.disabled) return;
+      mode = b.getAttribute('data-mode');
+      lsSet('snake.mode', mode);
+      reset();
+    });
+  })();
   padBtn.addEventListener('click', function () {
     padOn = !padOn;
     try { localStorage.setItem('snake.pad', padOn ? '1' : '0'); } catch (e) {}
@@ -1287,6 +1761,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     W: [0, -1], S: [0, 1], A: [-1, 0], D: [1, 0]
   };
   window.addEventListener('keydown', function (e) {
+    if (e.target && e.target.tagName === 'INPUT') return;
     if (keys[e.key]) {
       e.preventDefault();
       setDir(keys[e.key][0], keys[e.key][1]);
@@ -1319,7 +1794,24 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       forceLevel: function (n) { level = n; syncMonsters(); refreshUI(); },
       addMonster: function (x, y) { monsters.push({ x: x, y: y, px: x, py: y, born: gt - 2000 }); },
       setPower: function (ms) { powerUntil = gt + ms; },
-      stepMonsters: function () { monstersStep(); }
+      stepMonsters: function () { monstersStep(); },
+      stats: function () { return JSON.parse(JSON.stringify(stats)); },
+      daily: function () { return JSON.parse(JSON.stringify(daily)); },
+      timeLeft: function () { return timeLeft; },
+      setTime: function (ms) { timeLeft = ms; },
+      mode: function () { return mode; },
+      skin: function () { return activeSkin().id; },
+      setStats: function (o) { for (var k in o) stats[k] = o[k]; },
+      renderMusic: function (sec) {
+        var oc = new OfflineAudioContext(1, 44100 * sec, 44100), g = oc.createGain(), t = 0, n = 0;
+        g.gain.value = MUSIC_VOL; g.connect(oc.destination);
+        while (t < sec) { mstepSched(oc, g, n, t, 100); t += 30 / 100; n++; }
+        return oc.startRendering().then(function (buf) {
+          var d = buf.getChannelData(0), pk = 0, ss = 0;
+          for (var i = 0; i < d.length; i++) { var v = Math.abs(d[i]); if (v > pk) pk = v; ss += d[i] * d[i]; }
+          return { peak: pk, rms: Math.sqrt(ss / d.length) };
+        });
+      }
     };
   }
 
