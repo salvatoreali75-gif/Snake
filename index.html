@@ -663,8 +663,15 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   }
 
   /* ---------- Classifica online (Firebase, progetto separato) ---------- */
-  // Finché qui sotto c'è null la classifica online resta spenta e il gioco funziona normalmente.
-  var FIREBASE_CONFIG = null;
+  // Configurazione pubblica del progetto Firebase "snake-classifica" (solo punteggi, nessun dato personale). Con null la classifica online resta spenta.
+  var FIREBASE_CONFIG = {
+    apiKey: "AIzaSyCxCqhCvKs1MjD--s0y2S3-ys7v08ZDYV4",
+    authDomain: "snake-classifica-24dd5.firebaseapp.com",
+    projectId: "snake-classifica-24dd5",
+    storageBucket: "snake-classifica-24dd5.firebasestorage.app",
+    messagingSenderId: "475021582325",
+    appId: "1:475021582325:web:e80ca848a6992bc7d58abc"
+  };
   var fbP = null;
   function fbReady() {
     if (!FIREBASE_CONFIG) return Promise.reject(new Error('off'));
