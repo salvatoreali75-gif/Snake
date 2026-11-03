@@ -283,6 +283,10 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 .nick { display: flex; gap: 8px; }
 .nick input { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--btn); color: var(--ink); -webkit-user-select: text; user-select: text; }
 .pnote { margin: 0; font-size: 0.78rem; color: var(--muted); }
+.pb textarea { font: 12px/1.4 var(--font-mono); min-height: 84px; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--btn); color: var(--ink); resize: vertical; -webkit-user-select: text; user-select: text; }
+.savebtns { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip.pri { background: var(--snake); color: var(--board); border-color: var(--snake); }
+.chip.warn { background: var(--danger); color: var(--board); border-color: var(--danger); }
 
 
 /* Gemme, negozio, notifiche e benvenuto */
@@ -353,6 +357,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
             <button class="btn" id="skinBtn" type="button">Skin</button>
             <button class="btn" id="misBtn" type="button">Missioni</button>
             <button class="btn" id="lbBtn" type="button">Classifica</button>
+            <button class="btn" id="saveBtn" type="button">Salvataggio</button>
           </div>
           <div class="ov-tools">
             <button class="btn" id="musicBtn" type="button">Musica: sì</button>
@@ -1077,9 +1082,91 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       if (panelKind === 'lb' && e2) e2.innerHTML = '<p class="pnote">Non riesco a caricare la classifica. Controlla la connessione.</p>';
     });
   }
+  /* ---------- Salvataggio: esporta / importa tutti i progressi (chiavi snake.*) ---------- */
+  var impPending = null, SAVE_MAX = 200000;
+  function saveData() {
+    var d = {};
+    try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf('snake.') === 0) d[k] = localStorage.getItem(k); } } catch (e) {}
+    return JSON.stringify({ game: 'snake', v: 1, date: new Date().toISOString(), data: d });
+  }
+  function parseSave(txt) {
+    if (!txt || txt.length > SAVE_MAX) return null;
+    var j, out = {}, n = 0;
+    try { j = JSON.parse(txt); } catch (e) { return null; }
+    if (!j || j.game !== 'snake' || !j.data || typeof j.data !== 'object') return null;
+    for (var k in j.data) {
+      if (k.indexOf('snake.') !== 0 || typeof j.data[k] !== 'string') return null;
+      out[k] = j.data[k]; n++;
+    }
+    return n ? { data: out, date: String(j.date || '') } : null;
+  }
+  function applySave(d) {
+    try {
+      var rm = [];
+      for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf('snake.') === 0) rm.push(k); }
+      rm.forEach(function (k) { localStorage.removeItem(k); });
+      for (var k2 in d) localStorage.setItem(k2, d[k2]);
+    } catch (e) { return false; }
+    location.reload();
+    return true;
+  }
+  function saveNote(html) { var n = document.getElementById('saveNote'); if (n) n.innerHTML = html; }
+  function offerImport(txt) {
+    var r = parseSave(txt);
+    impPending = r;
+    if (!r) { saveNote('<span style="color:var(--danger)">Questo non è un salvataggio di Snake valido. Controlla di aver scelto il file giusto o di aver copiato tutto il codice.</span>'); return; }
+    var dt = r.date ? new Date(r.date) : null, when = dt && !isNaN(dt) ? ' del ' + dt.getDate() + '/' + (dt.getMonth() + 1) + '/' + dt.getFullYear() : '';
+    saveNote('Salvataggio' + escH(when) + ' pronto. I progressi attuali di questo telefono verranno sostituiti.<div class="savebtns" style="margin-top:8px"><button class="chip warn" type="button" data-a="impok">Sostituisci i progressi</button><button class="chip" type="button" data-a="impno">Annulla</button></div>');
+  }
+  var impFile = document.createElement('input');
+  impFile.type = 'file'; impFile.accept = '.json,application/json,text/plain'; impFile.hidden = true;
+  document.body.appendChild(impFile);
+  impFile.addEventListener('change', function () {
+    var f = impFile.files && impFile.files[0];
+    if (!f) return;
+    if (f.size > SAVE_MAX) { offerImport(''); return; }
+    var fr = new FileReader();
+    fr.onload = function () { offerImport(String(fr.result || '')); };
+    fr.onerror = function () { saveNote('Non riesco a leggere il file.'); };
+    fr.readAsText(f);
+  });
+  function exportFile() {
+    var txt = saveData(), name = 'snake-salvataggio.json';
+    try {
+      var file = new File([txt], name, { type: 'application/json' });
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: 'Salvataggio Snake' }).then(function () { saveNote('Salvataggio condiviso.'); }, function (err) { if (err && err.name !== 'AbortError') saveNote('Condivisione non riuscita: prova con «Copia codice».'); });
+        return;
+      }
+    } catch (e) {}
+    try {
+      var a = document.createElement('a'), url = URL.createObjectURL(new Blob([txt], { type: 'application/json' }));
+      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+      saveNote('Download di «' + name + '» avviato. Se il file non compare tra i download, usa «Copia codice».');
+    } catch (e) { saveNote('Non riesco a salvare il file: usa «Copia codice».'); }
+  }
+  function exportCopy() {
+    var txt = saveData(), ta = document.getElementById('impTxt');
+    var fallback = function () { if (ta) { ta.value = txt; ta.focus(); ta.select(); } saveNote('Il codice è nel riquadro qui sopra, già selezionato: copialo e conservalo (per esempio in una nota o una mail a te stesso).'); };
+    try {
+      navigator.clipboard.writeText(txt).then(function () { saveNote('Codice copiato. Incollalo in una nota o in una mail a te stesso per conservarlo.'); }, fallback);
+    } catch (e) { fallback(); }
+  }
+  function savePanel() {
+    return panelHead('Salvataggio') + '<div class="pb">' +
+      '<p class="pnote">Porta gemme, skin, record, missioni e preferenze su un altro telefono, o tienine una copia di sicurezza.</p>' +
+      '<h3 class="pt">Esporta</h3><div class="savebtns"><button class="chip pri" type="button" data-a="expfile">Salva file</button><button class="chip" type="button" data-a="expcopy">Copia codice</button></div>' +
+      '<h3 class="pt">Importa</h3><div class="savebtns"><button class="chip" type="button" data-a="impfile">Apri file</button></div>' +
+      '<textarea id="impTxt" spellcheck="false" autocomplete="off" placeholder="…oppure incolla qui il codice copiato"></textarea>' +
+      '<div class="savebtns"><button class="chip" type="button" data-a="imppaste">Importa il codice incollato</button></div>' +
+      '<p class="pnote" id="saveNote"></p>' +
+      '<p class="pnote">La posizione in classifica resta legata a questo telefono: sull’altro il tuo record viene reinviato a fine partita.</p></div>';
+  }
   function openPanel(kind) {
     panelKind = kind;
-    panel.innerHTML = kind === 'skin' ? skinPanel() : (kind === 'mis' ? misPanel() : lbPanel());
+    impPending = null;
+    panel.innerHTML = kind === 'skin' ? skinPanel() : (kind === 'mis' ? misPanel() : (kind === 'save' ? savePanel() : lbPanel()));
     panel.hidden = false;
     if (kind === 'lb') fillLb();
   }
@@ -1098,6 +1185,12 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       }
     }
     else if (a === 'lbmode') { lbMode = id; openPanel('lb'); }
+    else if (a === 'expfile') exportFile();
+    else if (a === 'expcopy') exportCopy();
+    else if (a === 'impfile') { impFile.value = ''; impFile.click(); }
+    else if (a === 'imppaste') { var tx = document.getElementById('impTxt'); offerImport(tx ? tx.value.trim() : ''); }
+    else if (a === 'impno') { impPending = null; saveNote(''); }
+    else if (a === 'impok') { if (impPending && !applySave(impPending.data)) saveNote('Non riesco a scrivere i dati su questo dispositivo.'); }
     else if (a === 'savename') {
       var inp = document.getElementById('nick');
       var nv = cleanNick(inp ? inp.value : ''), ne = nickError(nv), note = document.getElementById('lbNote');
@@ -2138,6 +2231,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   document.getElementById('wnick').addEventListener('input', function () { document.getElementById('werr').textContent = ''; });
   misBtn.addEventListener('click', function () { openPanel('mis'); });
   lbBtn.addEventListener('click', function () { lbMode = mode; openPanel('lb'); });
+  $('saveBtn').addEventListener('click', function () { openPanel('save'); });
   (function buildModes() {
     modeSeg.innerHTML = MODES.map(function (m) { return '<button class="chip" type="button" data-mode="' + m.id + '">' + m.name + '</button>'; }).join('');
     modeSeg.addEventListener('click', function (e) {
@@ -2161,7 +2255,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     W: [0, -1], S: [0, 1], A: [-1, 0], D: [1, 0]
   };
   window.addEventListener('keydown', function (e) {
-    if (e.target && e.target.tagName === 'INPUT') return;
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
     if (keys[e.key]) {
       e.preventDefault();
       setDir(keys[e.key][0], keys[e.key][1]);
@@ -2228,12 +2322,41 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   reset();
   if (FIREBASE_CONFIG && lsGet('snake.nickok', '0') !== '1') showWelcome(); else loginCheck();
   document.addEventListener('visibilitychange', function () { if (!document.hidden && welcomeEl.hidden) { loginCheck(); refreshUI(); } });
+  // per l'avviso di aggiornamento: partita in corso? e notifiche del gioco
+  window.__snakeBusy = function () { return state === 'running' || state === 'paused'; };
+  window.__snakeNotify = notify;
   requestAnimationFrame(frame);
 })();
 </script>
 <script>
 if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-  window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+  // Aggiornamenti: quando una nuova versione è pronta lo dice, e ricarica solo fuori dalla partita
+  (function () {
+    var sw = navigator.serviceWorker, hadCtrl = !!sw.controller, waiting = null, asked = false, reloading = false;
+    var busy = function () { return window.__snakeBusy ? window.__snakeBusy() : false; };
+    function activate() { if (waiting) waiting.postMessage("SKIP_WAITING"); }
+    function offer(w) {
+      if (!w || !hadCtrl || asked) return;
+      waiting = w; asked = true;
+      if (window.__snakeNotify) window.__snakeNotify({ icon: "✨", title: "Nuova versione disponibile", text: "Tocca «Aggiorna ora», oppure si aggiorna da sola alla fine della prossima partita.", actions: [{ label: "Aggiorna ora", pri: true, fn: activate }] });
+      var was = busy();
+      setInterval(function () { var b = busy(); if (was && !b) activate(); was = b; }, 1000);
+    }
+    sw.addEventListener("controllerchange", function () {
+      if (!hadCtrl || reloading) return;             // prima installazione: nessuna ricarica
+      reloading = true;
+      (function go() { if (busy()) { setTimeout(go, 1500); return; } location.reload(); })();
+    });
+    window.addEventListener("load", function () {
+      sw.register("sw.js").then(function (reg) {
+        if (reg.waiting) offer(reg.waiting);
+        reg.addEventListener("updatefound", function () {
+          var w = reg.installing;
+          if (w) w.addEventListener("statechange", function () { if (w.state === "installed") offer(w); });
+        });
+      }).catch(function () {});
+    });
+  })();
 }
 </script>
 </body>

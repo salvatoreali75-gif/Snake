@@ -1,0 +1,28 @@
+rules_version = '2';
+// Regole della classifica di Snake. Vanno incollate in Firebase: console > Firestore Database > Regole > Pubblica.
+// Ognuno può leggere la classifica, ma può scrivere solo il proprio punteggio, con valori plausibili.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /modes/{mode}/scores/{uid} {
+      allow read: if true;
+      allow create, update: if request.auth != null
+        && request.auth.uid == uid
+        && mode in ['classic', 'timed', 'turbo', 'open']
+        && request.resource.data.keys().hasOnly(['name', 'score', 'level', 'at'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 3
+        && request.resource.data.name.size() <= 14
+        && request.resource.data.score is int
+        && request.resource.data.score >= 1
+        && request.resource.data.score <= 20000
+        && request.resource.data.level is int
+        && request.resource.data.level >= 1
+        && request.resource.data.level <= 99
+        && request.resource.data.at == request.time;
+      allow delete: if false;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
