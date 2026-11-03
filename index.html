@@ -6,13 +6,13 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Snake">
+<meta name="apple-mobile-web-app-title" content="Snake Gems">
 <meta name="theme-color" content="#0E151C">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>:root{color-scheme:light dark;padding-block:env(safe-area-inset-top,0px) env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}[hidden]{display:none!important}</style>
-<title>Snake</title>
+<title>Snake Gems</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Mono:wght@500&display=swap">
@@ -335,56 +335,56 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 
 <main class="app" id="app">
   <header>
-    <h1>Snake</h1>
+    <h1>Snake Gems</h1>
     <div class="stats">
-      <div class="stat"><span>Livello</span><b id="level">1</b></div>
-      <div class="stat"><span>Punti</span><b id="score">0</b></div>
-      <div class="stat"><span>Record</span><b id="best">0</b></div>
+      <div class="stat"><span data-en="Level">Livello</span><b id="level">1</b></div>
+      <div class="stat"><span data-en="Score">Punti</span><b id="score">0</b></div>
+      <div class="stat"><span data-en="Best">Record</span><b id="best">0</b></div>
     </div>
-    <button class="pausebtn" id="pauseBtn" type="button" aria-label="Pausa" disabled>
+    <button class="pausebtn" id="pauseBtn" type="button" aria-label="Pausa" data-en-label="Pause" disabled>
       <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="3" y="2" width="3.4" height="12" rx="1"/><rect x="9.6" y="2" width="3.4" height="12" rx="1"/></svg>
     </button>
   </header>
 
   <div class="stage" id="stage">
-    <div class="board" id="board" aria-label="Griglia di gioco">
+    <div class="board" id="board" aria-label="Griglia di gioco" data-en-label="Game board">
       <canvas id="cv"></canvas>
       <div class="overlay" id="overlay">
         <div class="ovin">
-          <button class="gempill" id="gemPill" type="button" aria-label="Gemme: apri il negozio">💎 <b id="gemN">0</b></button>
+          <button class="gempill" id="gemPill" type="button" aria-label="Gemme: apri il negozio" data-en-label="Gems: open the shop">💎 <b id="gemN">0</b></button>
           <p class="ov-title" id="ovTitle">Pronto?</p>
           <p class="ov-sub" id="ovSub">Tocca lo schermo per iniziare</p>
           <button class="btn play" id="playBtn" type="button">Gioca</button>
           <div class="seg" id="modeSeg"></div>
           <p class="mdesc" id="modeDesc"></p>
           <div class="ov-tools">
-            <button class="btn" id="skinBtn" type="button">Skin</button>
-            <button class="btn" id="misBtn" type="button">Missioni</button>
-            <button class="btn" id="lbBtn" type="button">Classifica</button>
-            <button class="btn" id="saveBtn" type="button">Salvataggio</button>
+            <button class="btn" id="skinBtn" type="button" data-en="Skins">Skin</button>
+            <button class="btn" id="misBtn" type="button" data-en="Missions">Missioni</button>
+            <button class="btn" id="lbBtn" type="button" data-en="Leaderboard">Classifica</button>
+            <button class="btn" id="saveBtn" type="button" data-en="Save">Salvataggio</button>
           </div>
           <div class="ov-tools">
             <button class="btn" id="musicBtn" type="button">Musica: sì</button>
             <button class="btn" id="volBtn" type="button">Volume: basso</button>
             <button class="btn" id="soundBtn" type="button">Effetti: sì</button>
             <button class="btn" id="padBtn" type="button">Pad: no</button>
-            <button class="btn" id="fsBtn" type="button" hidden>Schermo intero</button>
+            <button class="btn" id="fsBtn" type="button" hidden data-en="Full screen">Schermo intero</button>
           </div>
           <div class="legend" aria-hidden="true">
-            <span><i style="background:var(--food)"></i>Mela +10</span>
-            <span><i style="background:var(--bonus)"></i>Stella +50</span>
-            <span><i style="background:var(--slow)"></i>Rallenta</span>
-            <span><i style="background:var(--cut)"></i>Accorcia</span>
-            <span><i style="background:var(--monster)"></i>Mostri dal livello 5</span>
+            <span><i style="background:var(--food)"></i><b data-en="Apple +10" style="font-weight:inherit">Mela +10</b></span>
+            <span><i style="background:var(--bonus)"></i><b data-en="Star +50" style="font-weight:inherit">Stella +50</b></span>
+            <span><i style="background:var(--slow)"></i><b data-en="Slow down" style="font-weight:inherit">Rallenta</b></span>
+            <span><i style="background:var(--cut)"></i><b data-en="Shorter" style="font-weight:inherit">Accorcia</b></span>
+            <span><i style="background:var(--monster)"></i><b data-en="Monsters from level 5" style="font-weight:inherit">Mostri dal livello 5</b></span>
           </div>
         </div>
         <div class="panel" id="panel" hidden></div>
       </div>
     </div>
   </div>
-  <p class="hint">Frecce o WASD per muoverti, spazio per la pausa. Ogni 5 cibi sale il livello.</p>
+  <p class="hint" data-en="Arrows or WASD to move, space to pause. Every 5 apples you level up.">Frecce o WASD per muoverti, spazio per la pausa. Ogni 5 cibi sale il livello.</p>
 
-  <div class="pad" id="pad" aria-label="Comandi: tocca sopra, sotto, a sinistra o a destra">
+  <div class="pad" id="pad" aria-label="Comandi: tocca sopra, sotto, a sinistra o a destra" data-en-label="Controls: tap up, down, left or right">
     <div class="z z-up" id="zUp"></div>
     <div class="z z-down" id="zDown"></div>
     <div class="z z-left" id="zLeft"></div>
@@ -403,15 +403,15 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 <div class="welcome" id="welcome" hidden>
   <form class="wbox" id="wform" novalidate>
     <div class="wlogo" aria-hidden="true">🐍</div>
-    <h2 id="wtitle">Benvenuto in Snake!</h2>
-    <p id="wtext">Scegli il tuo nickname. Con questo entri subito in classifica e gli altri giocatori ti riconoscono.</p>
-    <input id="wnick" type="text" maxlength="14" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Il tuo nickname" aria-label="Nickname">
+    <h2 id="wtitle" data-en="Welcome to Snake Gems!">Benvenuto in Snake Gems!</h2>
+    <p id="wtext" data-en="Choose your nickname. It puts you on the leaderboard right away so other players can see you.">Scegli il tuo nickname. Con questo entri subito in classifica e gli altri giocatori ti riconoscono.</p>
+    <input id="wnick" type="text" maxlength="14" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Il tuo nickname" data-en-ph="Your nickname" aria-label="Nickname">
     <p class="werr" id="werr" role="alert"></p>
-    <button class="btn play" id="wgo" type="submit">Entra in classifica</button>
-    <ul><li>💎 Guadagni gemme giocando, con le missioni e ogni giorno</li><li>🎨 Le spendi tu per sbloccare le skin che vuoi</li><li>🏆 Il tuo record va in classifica da solo</li></ul>
-    <p class="pnote">Da 3 a 14 caratteri. Lo puoi cambiare dalla Classifica.</p>
-    <button class="wskip" type="button" id="wskip">Più tardi: gioca senza classifica</button>
-    <p class="pnote"><a href="privacy.html" target="_blank" rel="noopener" id="wpriv">Informativa privacy</a></p>
+    <button class="btn play" id="wgo" type="submit" data-en="Join the leaderboard">Entra in classifica</button>
+    <ul><li data-en="💎 Earn gems by playing, with missions and every day">💎 Guadagni gemme giocando, con le missioni e ogni giorno</li><li data-en="🎨 Spend them to unlock the skins you like">🎨 Le spendi tu per sbloccare le skin che vuoi</li><li data-en="🏆 Your best score goes on the leaderboard by itself">🏆 Il tuo record va in classifica da solo</li></ul>
+    <p class="pnote" data-en="3 to 14 characters. You can change it from the Leaderboard.">Da 3 a 14 caratteri. Lo puoi cambiare dalla Classifica.</p>
+    <button class="wskip" type="button" id="wskip" data-en="Later: play without the leaderboard">Più tardi: gioca senza classifica</button>
+    <p class="pnote"><a href="privacy.html" target="_blank" rel="noopener" id="wpriv" data-en="Privacy policy">Informativa privacy</a></p>
   </form>
 </div>
 
@@ -421,6 +421,11 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   var LANG = (function () { var l = (navigator.languages && navigator.languages[0]) || navigator.language || 'it'; return /^it\b/i.test(l) ? 'it' : 'en'; })();
   function T(it, en) { return LANG === 'it' ? it : en; }
   document.documentElement.lang = LANG;
+  if (LANG === 'en') {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { el.textContent = el.getAttribute('data-en'); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en-label]'), function (el) { el.setAttribute('aria-label', el.getAttribute('data-en-label')); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en-ph]'), function (el) { el.setAttribute('placeholder', el.getAttribute('data-en-ph')); });
+  }
   var COLS = 20, ROWS = 20;           // la griglia si adatta allo schermo (colonne fisse, righe in base all'altezza)
   var MIN_ROWS = 16, MAX_ROWS = 40;
   var FOODS_PER_LEVEL = 5;
@@ -448,7 +453,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     }
   });
   function onFs() {
-    fsBtn.textContent = fsEl() ? 'Riduci' : 'Schermo intero';
+    fsBtn.textContent = fsEl() ? T('Riduci', 'Exit full screen') : T('Schermo intero', 'Full screen');
     setTimeout(resize, 60);
   }
   document.addEventListener('fullscreenchange', onFs);
@@ -524,10 +529,10 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 
   /* ---------- Modalità, statistiche e preferenze ---------- */
   var MODES = [
-    { id: 'classic', name: 'Classica', desc: 'Livelli, ostacoli e mostri. Contro i muri si perde.', wrap: false },
-    { id: 'timed', name: 'A tempo', desc: '90 secondi: ogni mela dà 2 secondi in più. Fai più punti che puoi.', wrap: false, time: 90000 },
-    { id: 'turbo', name: 'Turbo', desc: 'Niente ostacoli né mostri: la velocità cresce a ogni mela.', wrap: false },
-    { id: 'open', name: 'Senza muri', desc: 'I bordi sono aperti: esci da un lato e rientri dall\u2019altro.', wrap: true }
+    { id: 'classic', name: T('Classica', 'Classic'), desc: T('Livelli, ostacoli e mostri. Contro i muri si perde.', 'Levels, obstacles and monsters. Hitting a wall ends the game.'), wrap: false },
+    { id: 'timed', name: T('A tempo', 'Timed'), desc: T('90 secondi: ogni mela dà 2 secondi in più. Fai più punti che puoi.', '90 seconds: every apple adds 2 seconds. Score as much as you can.'), wrap: false, time: 90000 },
+    { id: 'turbo', name: 'Turbo', desc: T('Niente ostacoli né mostri: la velocità cresce a ogni mela.', 'No obstacles, no monsters: speed goes up with every apple.'), wrap: false },
+    { id: 'open', name: T('Senza muri', 'No walls'), desc: T('I bordi sono aperti: esci da un lato e rientri dall\u2019altro.', 'Edges are open: leave on one side and come back on the other.'), wrap: true }
   ];
   function modeOf(id) { for (var i = 0; i < MODES.length; i++) if (MODES[i].id === id) return MODES[i]; return null; }
   function lsGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
@@ -560,36 +565,36 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 
   /* ---------- Skin sbloccabili ---------- */
   var SKINS = [
-    { id: 'base', name: 'Classico', need: null },
-    { id: 'smeraldo', name: 'Smeraldo', need: { k: 'games', n: 3, t: 'Gioca 3 partite' }, light: ['#1E8A5A', '#0F5A3A'], dark: ['#4FD08F', '#B6F5D3'] },
-    { id: 'corallo', name: 'Corallo', need: { k: 'best', n: 100, t: 'Fai 100 punti in una partita' }, light: ['#D9573F', '#8F2C1B'], dark: ['#FF8A70', '#FFD0C4'] },
-    { id: 'viola', name: 'Viola', need: { k: 'apples', n: 60, t: 'Mangia 60 mele in tutto' }, light: ['#7C4DDB', '#4B2A99'], dark: ['#B292FF', '#E4D8FF'] },
-    { id: 'oro', name: 'Oro', need: { k: 'level', n: 6, t: 'Arriva al livello 6' }, light: ['#D79A12', '#8F6200'], dark: ['#F5B83D', '#FFE29A'] },
-    { id: 'ghiaccio', name: 'Ghiaccio', need: { k: 'best', n: 300, t: 'Fai 300 punti in una partita' }, light: ['#2A9DB5', '#16667A'], dark: ['#6FDDF2', '#D3F7FF'] },
-    { id: 'notte', name: 'Notte', need: { k: 'games', n: 25, t: 'Gioca 25 partite' }, light: ['#33404D', '#0F1720'], dark: ['#8FA3B5', '#FFFFFF'] },
-    { id: 'rainbow', name: 'Arcobaleno', need: { k: 'mdone', n: 5, t: 'Completa 5 missioni' }, rainbow: true },
-    { id: 'aurora', name: 'Aurora', need: { k: 'maxStreak', n: 3, t: 'Gioca 3 giorni di fila' }, light: ['#2A9DB5', '#0F3B4A'], dark: ['#6FDDF2', '#E6FFFA'], gl: ['#1E8A5A', '#2A9DB5', '#7C4DDB'], gd: ['#4FD08F', '#6FDDF2', '#B292FF'] },
-    { id: 'fuoco', name: 'Fuoco', need: { k: 'maxStreak', n: 7, t: 'Gioca 7 giorni di fila' }, light: ['#E8801A', '#7A1E10'], dark: ['#FFA64D', '#FFF1C9'], gl: ['#C8432B', '#E8801A', '#F5B83D'], gd: ['#FF7A5C', '#FFA64D', '#FFE08A'] },
-    { id: 'sakura', name: 'Sakura', need: { k: 'wdone', n: 2, t: 'Completa 2 missioni settimanali' }, light: ['#F08FB0', '#8F1F4A'], dark: ['#FFB3CB', '#FFF0F5'], gl: ['#D9467A', '#F08FB0', '#FBC4D8'], gd: ['#FF7FA8', '#FFB3CB', '#FFD9E6'] },
-    { id: 'cosmo', name: 'Cosmo', need: { k: 'stars', n: 25, t: 'Prendi 25 stelle viola in tutto' }, light: ['#4B2A99', '#0B0E33'], dark: ['#B292FF', '#FFFFFF'], gl: ['#1B1F5E', '#4B2A99', '#7C4DDB'], gd: ['#7C8CFF', '#B292FF', '#E4D8FF'] },
-    { id: 'lava', name: 'Lava', need: { k: 'monsters', n: 20, t: 'Mangia 20 mostri in tutto' }, light: ['#8F2C1B', '#000000'], dark: ['#FF7A5C', '#FFE2C4'], gl: ['#1F1F1F', '#8F2C1B', '#FF6A2A'], gd: ['#5A5A5A', '#FF7A5C', '#FFB070'] },
-    { id: 'menta', name: 'Menta', price: 80, light: ['#2FB39A', '#17715F'], dark: ['#7FE6D0', '#D8FFF5'], gl: ['#17715F', '#2FB39A', '#8FE8D4'], gd: ['#4FC9B0', '#7FE6D0', '#D8FFF5'] },
-    { id: 'pesca', name: 'Pesca', price: 80, light: ['#EE8B6E', '#A8442A'], dark: ['#FFB59C', '#FFE7DD'], gl: ['#C85B3E', '#EE8B6E', '#F8C4A8'], gd: ['#FF9A7E', '#FFB59C', '#FFE0D2'] },
-    { id: 'cielo', name: 'Cielo', price: 120, light: ['#3C8DD9', '#1B4F8C'], dark: ['#7DBBFF', '#E0F0FF'], gl: ['#1B4F8C', '#3C8DD9', '#8FC4F5'], gd: ['#5AA4EB', '#7DBBFF', '#D6EBFF'] },
-    { id: 'lampone', name: 'Lampone', price: 120, light: ['#C2336B', '#7A1445'], dark: ['#FF6FA0', '#FFD6E6'], gl: ['#7A1445', '#C2336B', '#F27AA6'], gd: ['#E04E85', '#FF6FA0', '#FFC2D8'] },
-    { id: 'ambra', name: 'Ambra', price: 200, light: ['#D88A1A', '#7A4A00'], dark: ['#FFC04D', '#FFF0C8'], gl: ['#7A4A00', '#D88A1A', '#F7C860'], gd: ['#E6A530', '#FFC04D', '#FFEBB5'] },
-    { id: 'oceano', name: 'Oceano', price: 200, light: ['#0F6E8C', '#08334A'], dark: ['#4FB8DD', '#CFF1FF'], gl: ['#08334A', '#0F6E8C', '#37B3D6'], gd: ['#2B90B8', '#4FB8DD', '#BDEBFF'] },
-    { id: 'giungla', name: 'Giungla', price: 300, light: ['#2F7D32', '#14451A'], dark: ['#7ED47F', '#DFFFD9'], gl: ['#14451A', '#2F7D32', '#8BCB4C'], gd: ['#4CAF50', '#7ED47F', '#CFF5A0'] },
-    { id: 'tramonto', name: 'Tramonto', price: 300, light: ['#E0603A', '#6A1B5E'], dark: ['#FF8A5C', '#FFD9F0'], gl: ['#6A1B5E', '#E0603A', '#F7B538'], gd: ['#B04FA0', '#FF8A5C', '#FFD36B'] },
-    { id: 'ametista', name: 'Ametista', price: 450, light: ['#8E44C9', '#4A1B7A'], dark: ['#C490F5', '#F1E3FF'], gl: ['#4A1B7A', '#8E44C9', '#D1A6F5'], gd: ['#9C5BDB', '#C490F5', '#F1E3FF'] },
+    { id: 'base', name: T('Classico', 'Classic'), need: null },
+    { id: 'smeraldo', name: T('Smeraldo', 'Emerald'), need: { k: 'games', n: 3, t: T('Gioca 3 partite', 'Play 3 games') }, light: ['#1E8A5A', '#0F5A3A'], dark: ['#4FD08F', '#B6F5D3'] },
+    { id: 'corallo', name: T('Corallo', 'Coral'), need: { k: 'best', n: 100, t: T('Fai 100 punti in una partita', 'Score 100 points in one game') }, light: ['#D9573F', '#8F2C1B'], dark: ['#FF8A70', '#FFD0C4'] },
+    { id: 'viola', name: T('Viola', 'Violet'), need: { k: 'apples', n: 60, t: T('Mangia 60 mele in tutto', 'Eat 60 apples in total') }, light: ['#7C4DDB', '#4B2A99'], dark: ['#B292FF', '#E4D8FF'] },
+    { id: 'oro', name: T('Oro', 'Gold'), need: { k: 'level', n: 6, t: T('Arriva al livello 6', 'Reach level 6') }, light: ['#D79A12', '#8F6200'], dark: ['#F5B83D', '#FFE29A'] },
+    { id: 'ghiaccio', name: T('Ghiaccio', 'Ice'), need: { k: 'best', n: 300, t: T('Fai 300 punti in una partita', 'Score 300 points in one game') }, light: ['#2A9DB5', '#16667A'], dark: ['#6FDDF2', '#D3F7FF'] },
+    { id: 'notte', name: T('Notte', 'Night'), need: { k: 'games', n: 25, t: T('Gioca 25 partite', 'Play 25 games') }, light: ['#33404D', '#0F1720'], dark: ['#8FA3B5', '#FFFFFF'] },
+    { id: 'rainbow', name: T('Arcobaleno', 'Rainbow'), need: { k: 'mdone', n: 5, t: T('Completa 5 missioni', 'Complete 5 missions') }, rainbow: true },
+    { id: 'aurora', name: 'Aurora', need: { k: 'maxStreak', n: 3, t: T('Gioca 3 giorni di fila', 'Play 3 days in a row') }, light: ['#2A9DB5', '#0F3B4A'], dark: ['#6FDDF2', '#E6FFFA'], gl: ['#1E8A5A', '#2A9DB5', '#7C4DDB'], gd: ['#4FD08F', '#6FDDF2', '#B292FF'] },
+    { id: 'fuoco', name: T('Fuoco', 'Fire'), need: { k: 'maxStreak', n: 7, t: T('Gioca 7 giorni di fila', 'Play 7 days in a row') }, light: ['#E8801A', '#7A1E10'], dark: ['#FFA64D', '#FFF1C9'], gl: ['#C8432B', '#E8801A', '#F5B83D'], gd: ['#FF7A5C', '#FFA64D', '#FFE08A'] },
+    { id: 'sakura', name: 'Sakura', need: { k: 'wdone', n: 2, t: T('Completa 2 missioni settimanali', 'Complete 2 weekly missions') }, light: ['#F08FB0', '#8F1F4A'], dark: ['#FFB3CB', '#FFF0F5'], gl: ['#D9467A', '#F08FB0', '#FBC4D8'], gd: ['#FF7FA8', '#FFB3CB', '#FFD9E6'] },
+    { id: 'cosmo', name: T('Cosmo', 'Cosmos'), need: { k: 'stars', n: 25, t: T('Prendi 25 stelle viola in tutto', 'Collect 25 purple stars in total') }, light: ['#4B2A99', '#0B0E33'], dark: ['#B292FF', '#FFFFFF'], gl: ['#1B1F5E', '#4B2A99', '#7C4DDB'], gd: ['#7C8CFF', '#B292FF', '#E4D8FF'] },
+    { id: 'lava', name: 'Lava', need: { k: 'monsters', n: 20, t: T('Mangia 20 mostri in tutto', 'Eat 20 monsters in total') }, light: ['#8F2C1B', '#000000'], dark: ['#FF7A5C', '#FFE2C4'], gl: ['#1F1F1F', '#8F2C1B', '#FF6A2A'], gd: ['#5A5A5A', '#FF7A5C', '#FFB070'] },
+    { id: 'menta', name: T('Menta', 'Mint'), price: 80, light: ['#2FB39A', '#17715F'], dark: ['#7FE6D0', '#D8FFF5'], gl: ['#17715F', '#2FB39A', '#8FE8D4'], gd: ['#4FC9B0', '#7FE6D0', '#D8FFF5'] },
+    { id: 'pesca', name: T('Pesca', 'Peach'), price: 80, light: ['#EE8B6E', '#A8442A'], dark: ['#FFB59C', '#FFE7DD'], gl: ['#C85B3E', '#EE8B6E', '#F8C4A8'], gd: ['#FF9A7E', '#FFB59C', '#FFE0D2'] },
+    { id: 'cielo', name: T('Cielo', 'Sky'), price: 120, light: ['#3C8DD9', '#1B4F8C'], dark: ['#7DBBFF', '#E0F0FF'], gl: ['#1B4F8C', '#3C8DD9', '#8FC4F5'], gd: ['#5AA4EB', '#7DBBFF', '#D6EBFF'] },
+    { id: 'lampone', name: T('Lampone', 'Raspberry'), price: 120, light: ['#C2336B', '#7A1445'], dark: ['#FF6FA0', '#FFD6E6'], gl: ['#7A1445', '#C2336B', '#F27AA6'], gd: ['#E04E85', '#FF6FA0', '#FFC2D8'] },
+    { id: 'ambra', name: T('Ambra', 'Amber'), price: 200, light: ['#D88A1A', '#7A4A00'], dark: ['#FFC04D', '#FFF0C8'], gl: ['#7A4A00', '#D88A1A', '#F7C860'], gd: ['#E6A530', '#FFC04D', '#FFEBB5'] },
+    { id: 'oceano', name: T('Oceano', 'Ocean'), price: 200, light: ['#0F6E8C', '#08334A'], dark: ['#4FB8DD', '#CFF1FF'], gl: ['#08334A', '#0F6E8C', '#37B3D6'], gd: ['#2B90B8', '#4FB8DD', '#BDEBFF'] },
+    { id: 'giungla', name: T('Giungla', 'Jungle'), price: 300, light: ['#2F7D32', '#14451A'], dark: ['#7ED47F', '#DFFFD9'], gl: ['#14451A', '#2F7D32', '#8BCB4C'], gd: ['#4CAF50', '#7ED47F', '#CFF5A0'] },
+    { id: 'tramonto', name: T('Tramonto', 'Sunset'), price: 300, light: ['#E0603A', '#6A1B5E'], dark: ['#FF8A5C', '#FFD9F0'], gl: ['#6A1B5E', '#E0603A', '#F7B538'], gd: ['#B04FA0', '#FF8A5C', '#FFD36B'] },
+    { id: 'ametista', name: T('Ametista', 'Amethyst'), price: 450, light: ['#8E44C9', '#4A1B7A'], dark: ['#C490F5', '#F1E3FF'], gl: ['#4A1B7A', '#8E44C9', '#D1A6F5'], gd: ['#9C5BDB', '#C490F5', '#F1E3FF'] },
     { id: 'neon', name: 'Neon', price: 450, glow: '#00FFAA', light: ['#00A878', '#007A55'], dark: ['#39FFB0', '#E8FFF6'], gl: ['#00A878', '#00E0A0', '#7CFFD0'], gd: ['#1DE9A5', '#39FFB0', '#B8FFE6'] },
-    { id: 'galassia', name: 'Galassia', price: 650, flow: { h: 265, r: 55 }, light: ['#5B3FD1', '#241565'], dark: ['#9A86FF', '#E8E2FF'], gl: ['#241565', '#5B3FD1', '#E04FA8'], gd: ['#6F5BFF', '#9A86FF', '#FF7FD0'] },
-    { id: 'zucchero', name: 'Zucchero filato', price: 650, light: ['#EF7FB6', '#B03E7A'], dark: ['#FF9AC8', '#FFE3F0'], gl: ['#7FD3F5', '#EF7FB6', '#FFE08A'], gd: ['#8FDCFA', '#FF9AC8', '#FFE9A0'] },
-    { id: 'platino', name: 'Platino', price: 650, light: ['#8A9BA8', '#3B4954'], dark: ['#DDE6EC', '#FFFFFF'], gl: ['#3B4954', '#8A9BA8', '#E3EBF0'], gd: ['#9FB0BC', '#DDE6EC', '#FFFFFF'] },
-    { id: 'elettrico', name: 'Elettrico', price: 900, glow: '#4DD2FF', light: ['#1F8FFF', '#0A3C8A'], dark: ['#5CC8FF', '#E3F6FF'], gl: ['#0A3C8A', '#1F8FFF', '#6FE3FF'], gd: ['#2FA0FF', '#5CC8FF', '#C8F2FF'] },
-    { id: 'ororosa', name: 'Oro rosa', price: 900, light: ['#D9917F', '#8A4A3C'], dark: ['#F7C1B2', '#FFEFE9'], gl: ['#8A4A3C', '#D9917F', '#F7D3C6'], gd: ['#E8A898', '#F7C1B2', '#FFF0EA'] },
-    { id: 'drago', name: 'Drago', price: 1200, glow: '#FF6A2A', flow: { h: 22, r: 24 }, light: ['#C0392B', '#5E0F08'], dark: ['#FF7A5C', '#FFE1B8'], gl: ['#5E0F08', '#C0392B', '#F39C12'], gd: ['#E5533F', '#FF7A5C', '#FFC857'] },
-    { id: 'diamante', name: 'Diamante', price: 1500, glow: '#9BEAFF', flow: { h: 195, r: 40 }, light: ['#2A9DB5', '#16667A'], dark: ['#BFF3FF', '#FFFFFF'], gl: ['#2A9DB5', '#7FDDF2', '#FFFFFF'], gd: ['#6FDDF2', '#BFF3FF', '#FFFFFF'] }
+    { id: 'galassia', name: T('Galassia', 'Galaxy'), price: 650, flow: { h: 265, r: 55 }, light: ['#5B3FD1', '#241565'], dark: ['#9A86FF', '#E8E2FF'], gl: ['#241565', '#5B3FD1', '#E04FA8'], gd: ['#6F5BFF', '#9A86FF', '#FF7FD0'] },
+    { id: 'zucchero', name: T('Zucchero filato', 'Cotton Candy'), price: 650, light: ['#EF7FB6', '#B03E7A'], dark: ['#FF9AC8', '#FFE3F0'], gl: ['#7FD3F5', '#EF7FB6', '#FFE08A'], gd: ['#8FDCFA', '#FF9AC8', '#FFE9A0'] },
+    { id: 'platino', name: T('Platino', 'Platinum'), price: 650, light: ['#8A9BA8', '#3B4954'], dark: ['#DDE6EC', '#FFFFFF'], gl: ['#3B4954', '#8A9BA8', '#E3EBF0'], gd: ['#9FB0BC', '#DDE6EC', '#FFFFFF'] },
+    { id: 'elettrico', name: T('Elettrico', 'Electric'), price: 900, glow: '#4DD2FF', light: ['#1F8FFF', '#0A3C8A'], dark: ['#5CC8FF', '#E3F6FF'], gl: ['#0A3C8A', '#1F8FFF', '#6FE3FF'], gd: ['#2FA0FF', '#5CC8FF', '#C8F2FF'] },
+    { id: 'ororosa', name: T('Oro rosa', 'Rose Gold'), price: 900, light: ['#D9917F', '#8A4A3C'], dark: ['#F7C1B2', '#FFEFE9'], gl: ['#8A4A3C', '#D9917F', '#F7D3C6'], gd: ['#E8A898', '#F7C1B2', '#FFF0EA'] },
+    { id: 'drago', name: T('Drago', 'Dragon'), price: 1200, glow: '#FF6A2A', flow: { h: 22, r: 24 }, light: ['#C0392B', '#5E0F08'], dark: ['#FF7A5C', '#FFE1B8'], gl: ['#5E0F08', '#C0392B', '#F39C12'], gd: ['#E5533F', '#FF7A5C', '#FFC857'] },
+    { id: 'diamante', name: T('Diamante', 'Diamond'), price: 1500, glow: '#9BEAFF', flow: { h: 195, r: 40 }, light: ['#2A9DB5', '#16667A'], dark: ['#BFF3FF', '#FFFFFF'], gl: ['#2A9DB5', '#7FDDF2', '#FFFFFF'], gd: ['#6FDDF2', '#BFF3FF', '#FFFFFF'] }
   ];
   function skinGrad(s) { return isDark() ? s.gd : s.gl; }
   function isDark() {
@@ -652,8 +657,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     buyArm = '';
     refreshGems();
     SFX.bonus();
-    notify({ icon: '🎉', title: '«' + sk.name + '» è tua!', text: equip ? 'La skin è già in uso. Ti restano ' + wallet.gems + ' gemme.' : 'Ti restano ' + wallet.gems + ' gemme.',
-      actions: equip ? [] : [{ label: 'Usala ora', pri: true, fn: function () { skinId = id; lsSet('snake.skin', id); if (panelKind === 'skin') openPanel('skin'); } }] });
+    notify({ icon: '🎉', title: '«' + sk.name + T('» è tua!', '» is yours!'), text: equip ? T('La skin è già in uso. Ti restano ', 'The skin is already equipped. You now have ') + wallet.gems + T(' gemme.', ' gems.') : T('Ti restano ', 'You now have ') + wallet.gems + T(' gemme.', ' gems.'),
+      actions: equip ? [] : [{ label: T('Usala ora', 'Use it now'), pri: true, fn: function () { skinId = id; lsSet('snake.skin', id); if (panelKind === 'skin') openPanel('skin'); } }] });
     if (panelKind === 'skin') openPanel('skin');
     return true;
   }
@@ -663,8 +668,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     cand.forEach(function (x) { wallet.nt[x.id] = 1; });
     saveWallet();
     var top = cand[cand.length - 1];
-    notify({ icon: '💎', title: 'Puoi sbloccare «' + top.name + '»!', text: 'Hai ' + wallet.gems + ' gemme e «' + top.name + '» ne costa ' + top.price + '.' + (cand.length > 1 ? ' Altre ' + (cand.length - 1) + (cand.length === 2 ? ' skin sono' : ' skin sono') + ' alla tua portata.' : ''),
-      actions: [{ label: 'Sblocca ora', pri: true, fn: function () { buySkin(top.id, true); } }, { label: 'Vai al negozio', fn: function () { openPanel('skin'); } }] });
+    notify({ icon: '💎', title: T('Puoi sbloccare «', 'You can unlock «') + top.name + '»!', text: T('Hai ', 'You have ') + wallet.gems + T(' gemme e «', ' gems and «') + top.name + T('» ne costa ', '» costs ') + top.price + '.' + (cand.length > 1 ? (cand.length === 2 ? T(' Anche un’altra skin è alla tua portata.', ' One more skin is within reach.') : T(' Altre ' + (cand.length - 1) + ' skin sono alla tua portata.', ' ' + (cand.length - 1) + ' more skins are within reach.')) : ''),
+      actions: [{ label: T('Sblocca ora', 'Unlock now'), pri: true, fn: function () { buySkin(top.id, true); } }, { label: T('Vai al negozio', 'Go to the shop'), fn: function () { openPanel('skin'); } }] });
   }
   function loginCheck() {
     var tk = todayKey();
@@ -673,13 +678,13 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     wallet.last = tk;
     if (first) {
       addGems(GEM_WELCOME);
-      notify({ icon: '🎁', title: 'Novità: le gemme!', text: 'Ne hai già ' + wallet.gems + ' in regalo. Le guadagni giocando, con le missioni e con l’accesso di ogni giorno, e le spendi tu per sbloccare le skin che vuoi.',
-        actions: [{ label: 'Vai al negozio', pri: true, fn: function () { openPanel('skin'); } }] });
+      notify({ icon: '🎁', title: T('Novità: le gemme!', 'New: gems!'), text: T('Ne hai già ', 'You already have ') + wallet.gems + T(' in regalo. Le guadagni giocando, con le missioni e con l’accesso di ogni giorno, e le spendi tu per sbloccare le skin che vuoi.', ' as a gift. Earn them by playing, with missions and by coming back every day, then spend them on the skins you like.'),
+        actions: [{ label: T('Vai al negozio', 'Go to the shop'), pri: true, fn: function () { openPanel('skin'); } }] });
     } else {
       addGems(bonus);
-      notify({ icon: '☀️', title: 'Bentornato' + (myName ? ', ' + myName : '') + '!', text: 'Accesso di oggi +' + bonus + ' 💎' + (st ? ' (serie di ' + st + (st === 1 ? ' giorno' : ' giorni') + ')' : '') + '. ' +
-        (yG ? 'Ieri hai guadagnato ' + yG + ' gemme.' : 'Ieri non hai guadagnato gemme: oggi si riparte!') + ' Ora ne hai ' + wallet.gems + '.',
-        actions: [{ label: 'Missioni', pri: true, fn: function () { openPanel('mis'); } }, { label: 'Negozio', fn: function () { openPanel('skin'); } }] });
+      notify({ icon: '☀️', title: T('Bentornato', 'Welcome back') + (myName ? ', ' + myName : '') + '!', text: T('Accesso di oggi +', 'Today’s bonus +') + bonus + ' 💎' + (st ? T(' (serie di ', ' (streak: ') + st + (st === 1 ? T(' giorno', ' day') : T(' giorni', ' days')) + ')' : '') + '. ' +
+        (yG ? T('Ieri hai guadagnato ', 'Yesterday you earned ') + yG + T(' gemme.', ' gems.') : T('Ieri non hai guadagnato gemme: oggi si riparte!', 'No gems yesterday: today is a fresh start!')) + T(' Ora ne hai ', ' You now have ') + wallet.gems + '.',
+        actions: [{ label: T('Missioni', 'Missions'), pri: true, fn: function () { openPanel('mis'); } }, { label: T('Negozio', 'Shop'), fn: function () { openPanel('skin'); } }] });
     }
     saveWallet();
     checkAfford();
@@ -702,7 +707,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       o.actions.forEach(function (a, i) { h += '<button class="chip' + (a.pri ? ' pri' : '') + '" type="button" data-n="' + i + '">' + escH(a.label) + '</button>'; });
       h += '</div>';
     }
-    el.innerHTML = h + '</div><button class="nc" type="button" data-n="x" aria-label="Chiudi">×</button>';
+    el.innerHTML = h + T('</div><button class="nc" type="button" data-n="x" aria-label="Chiudi">×</button>', '</div><button class="nc" type="button" data-n="x" aria-label="Close">×</button>');
     notifsEl.appendChild(el);
     notifCur = el;
     el.addEventListener('click', function (e) {
@@ -734,8 +739,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       var q = misDoneQ, tot = q.reduce(function (n, x) { return n + x.g; }, 0);
       misDoneQ = [];
       SFX.bonus();
-      if (q.length === 1) notify({ icon: '🏆', title: q[0].w ? 'Missione settimanale compiuta!' : 'Missione compiuta!', text: q[0].t + '. Premio +' + q[0].g + ' 💎.', actions: [{ label: 'Vedi missioni', pri: true, fn: function () { openPanel('mis'); } }] });
-      else notify({ icon: '🏆', title: q.length + ' missioni compiute!', text: q.map(function (x) { return x.t; }).join(' · ') + '. Premio totale +' + tot + ' 💎.', actions: [{ label: 'Vedi missioni', pri: true, fn: function () { openPanel('mis'); } }] });
+      if (q.length === 1) notify({ icon: '🏆', title: q[0].w ? T('Missione settimanale compiuta!', 'Weekly mission complete!') : T('Missione compiuta!', 'Mission complete!'), text: q[0].t + T('. Premio +', '. Reward +') + q[0].g + ' 💎.', actions: [{ label: T('Vedi missioni', 'See missions'), pri: true, fn: function () { openPanel('mis'); } }] });
+      else notify({ icon: '🏆', title: q.length + T(' missioni compiute!', ' missions complete!'), text: q.map(function (x) { return x.t; }).join(' · ') + T('. Premio totale +', '. Total reward +') + tot + ' 💎.', actions: [{ label: T('Vedi missioni', 'See missions'), pri: true, fn: function () { openPanel('mis'); } }] });
     }
     var h = notifHold;
     notifHold = [];
@@ -762,16 +767,16 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     return n.split(/[^a-z]+/).some(function (t) { return BAD_WORD.indexOf(t) > -1; });
   }
   function nickError(v) {
-    if (v.length < 3) return 'Scrivi almeno 3 caratteri.';
+    if (v.length < 3) return T('Scrivi almeno 3 caratteri.', 'Use at least 3 characters.');
     if (badName(v)) return T('Questo nome non è permesso: scegline un altro.', 'This name is not allowed: please choose another one.');
-    if (!/^[A-Za-z0-9À-ɏ _.\-]+$/.test(v)) return 'Usa solo lettere, numeri, spazio, punto, trattino o underscore.';
+    if (!/^[A-Za-z0-9À-ɏ _.\-]+$/.test(v)) return T('Usa solo lettere, numeri, spazio, punto, trattino o underscore.', 'Use only letters, numbers, spaces, dots, dashes or underscores.');
     return '';
   }
   function showWelcome() {
     var i = document.getElementById('wnick'), t = document.getElementById('wtitle'), tx = document.getElementById('wtext');
     if (myName) {
-      t.textContent = 'Una novità!';
-      tx.textContent = 'Ora ogni giocatore ha un nickname e il tuo record entra in classifica da solo. Conferma il nome che avevi o cambialo.';
+      t.textContent = T('Una novità!', 'Something new!');
+      tx.textContent = T('Ora ogni giocatore ha un nickname e il tuo record entra in classifica da solo. Conferma il nome che avevi o cambialo.', 'Every player now has a nickname and your best score goes on the leaderboard by itself. Keep your name or change it.');
       i.value = myName;
     }
     welcomeEl.hidden = false;
@@ -786,22 +791,22 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 
   /* ---------- Missioni (3 al giorno e 3 a settimana, uguali per tutti i telefoni) e serie di giorni ---------- */
   var MIS = [
-    { k: 'apples', t: 'Mangia {n} mele', n: [15, 30, 50], acc: true },
-    { k: 'score', t: 'Fai {n} punti in una partita', n: [80, 150, 250] },
-    { k: 'level', t: 'Arriva al livello {n}', n: [3, 5, 7] },
-    { k: 'stars', t: 'Prendi {n} stelle viola', n: [1, 2, 3], acc: true },
-    { k: 'games', t: 'Gioca {n} partite', n: [3, 5, 8], acc: true },
-    { k: 'monsters', t: 'Mangia {n} mostri col Potere', n: [1, 2, 3], acc: true },
-    { k: 'timed', t: 'Fai {n} punti in modalità A tempo', n: [60, 120, 200] }
+    { k: 'apples', t: T('Mangia {n} mele', 'Eat {n} apples'), n: [15, 30, 50], acc: true },
+    { k: 'score', t: T('Fai {n} punti in una partita', 'Score {n} points in one game'), n: [80, 150, 250] },
+    { k: 'level', t: T('Arriva al livello {n}', 'Reach level {n}'), n: [3, 5, 7] },
+    { k: 'stars', t: T('Prendi {n} stelle viola', 'Collect {n} purple stars'), n: [1, 2, 3], acc: true },
+    { k: 'games', t: T('Gioca {n} partite', 'Play {n} games'), n: [3, 5, 8], acc: true },
+    { k: 'monsters', t: T('Mangia {n} mostri col Potere', 'Eat {n} monsters with Power'), n: [1, 2, 3], acc: true },
+    { k: 'timed', t: T('Fai {n} punti in modalità A tempo', 'Score {n} points in Timed mode'), n: [60, 120, 200] }
   ];
   var MIS_W = [
-    { k: 'apples', t: 'Mangia {n} mele in settimana', n: [150, 250, 400], acc: true },
-    { k: 'stars', t: 'Prendi {n} stelle viola in settimana', n: [8, 12, 18], acc: true },
-    { k: 'monsters', t: 'Mangia {n} mostri in settimana', n: [6, 10, 15], acc: true },
-    { k: 'games', t: 'Gioca {n} partite in settimana', n: [15, 25, 40], acc: true },
-    { k: 'score', t: 'Fai {n} punti in una partita', n: [300, 450, 600] },
-    { k: 'level', t: 'Arriva al livello {n}', n: [8, 10, 12] },
-    { k: 'timed', t: 'Fai {n} punti in modalità A tempo', n: [250, 350, 450] }
+    { k: 'apples', t: T('Mangia {n} mele in settimana', 'Eat {n} apples this week'), n: [150, 250, 400], acc: true },
+    { k: 'stars', t: T('Prendi {n} stelle viola in settimana', 'Collect {n} purple stars this week'), n: [8, 12, 18], acc: true },
+    { k: 'monsters', t: T('Mangia {n} mostri in settimana', 'Eat {n} monsters this week'), n: [6, 10, 15], acc: true },
+    { k: 'games', t: T('Gioca {n} partite in settimana', 'Play {n} games this week'), n: [15, 25, 40], acc: true },
+    { k: 'score', t: T('Fai {n} punti in una partita', 'Score {n} points in one game'), n: [300, 450, 600] },
+    { k: 'level', t: T('Arriva al livello {n}', 'Reach level {n}'), n: [8, 10, 12] },
+    { k: 'timed', t: T('Fai {n} punti in modalità A tempo', 'Score {n} points in Timed mode'), n: [250, 350, 450] }
   ];
   var daily = null, weekly = null;
   function dayKey(d) {
@@ -848,7 +853,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   function missionEvent(k, amount, absolute) {
     if (!daily || daily.date !== todayKey() || !weekly || weekly.date !== weekKey()) loadDaily();
     var changed = false;
-    [[daily, MIS, 'mdone', 'Missione compiuta!'], [weekly, MIS_W, 'wdone', 'Missione settimanale!']].forEach(function (s) {
+    [[daily, MIS, 'mdone', T('Missione compiuta!', 'Mission complete!')], [weekly, MIS_W, 'wdone', T('Missione settimanale!', 'Weekly mission!')]].forEach(function (s) {
       s[0].m.forEach(function (m) {
         if (m.k !== k || m.d) return;
         m.p = absolute ? Math.max(m.p, amount) : m.p + amount;
@@ -882,7 +887,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   }
 
   /* ---------- Musica di sottofondo (generata nel gioco, volume basso) ---------- */
-  var MUSIC_LEVELS = [0.2, 0.36, 0.6], MUSIC_NAMES = ['basso', 'medio', 'alto'], mgain = null, mtimer = null, mnext = 0, mstep = 0;
+  var MUSIC_LEVELS = [0.2, 0.36, 0.6], MUSIC_NAMES = [T('basso', 'low'), T('medio', 'medium'), T('alto', 'high')], mgain = null, mtimer = null, mnext = 0, mstep = 0;
   // Otto battute in La minore: Am F C G Am F Dm E
   var CH = [{ r: 57, t: 3 }, { r: 53, t: 4 }, { r: 60, t: 4 }, { r: 55, t: 4 }, { r: 57, t: 3 }, { r: 53, t: 4 }, { r: 50, t: 3 }, { r: 52, t: 4 }];
   var ARP = [0, 2, 1, 2, 3, 2, 1, 2];
@@ -1070,61 +1075,61 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   /* ---------- Schede: skin, missioni, classifica ---------- */
   var panel = $('panel'), panelKind = '', lbMode = mode;
   function escH(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function panelHead(title) { return '<div class="ph"><h2>' + title + '</h2><button class="chip" type="button" data-a="close">Chiudi</button></div>'; }
+  function panelHead(title) { return '<div class="ph"><h2>' + title + T('</h2><button class="chip" type="button" data-a="close">Chiudi</button></div>', '</h2><button class="chip" type="button" data-a="close">Close</button></div>'); }
   function skinCard(s) {
     var ok = skinOk(s), cols = skinCols(s) || [C.snake, C['snake-head']], cur = s.id === activeSkin().id, cls = '', sub = '', dis = '';
     if (s.price && !ok) {
       var miss = s.price - wallet.gems;
-      if (buyArm === s.id) { cls = ' arm'; sub = '<span class="pr">Tocca ancora per comprarla: 💎 ' + s.price + '</span>'; }
-      else if (miss <= 0) { cls = ' can'; sub = '<span class="pr">Sblocca · 💎 ' + s.price + '</span>'; }
-      else { cls = ' lock'; dis = ' disabled'; sub = '<span class="pr">💎 ' + s.price + '</span> · ti mancano ' + miss; }
-    } else if (!ok) { cls = ' lock'; dis = ' disabled'; sub = s.need.t + ' (' + Math.min(statVal(s.need.k), s.need.n) + ' su ' + s.need.n + ')'; }
-    else sub = cur ? 'In uso' : 'Tocca per usarla';
+      if (buyArm === s.id) { cls = ' arm'; sub = T('<span class="pr">Tocca ancora per comprarla: 💎 ', '<span class="pr">Tap again to buy it: 💎 ') + s.price + '</span>'; }
+      else if (miss <= 0) { cls = ' can'; sub = T('<span class="pr">Sblocca · 💎 ', '<span class="pr">Unlock · 💎 ') + s.price + '</span>'; }
+      else { cls = ' lock'; dis = ' disabled'; sub = '<span class="pr">💎 ' + s.price + T('</span> · ti mancano ', '</span> · you need ') + miss; }
+    } else if (!ok) { cls = ' lock'; dis = ' disabled'; sub = s.need.t + ' (' + Math.min(statVal(s.need.k), s.need.n) + T(' su ', ' of ') + s.need.n + ')'; }
+    else sub = cur ? T('In uso', 'Equipped') : T('Tocca per usarla', 'Tap to use it');
     return '<button class="skin' + (cur ? ' on' : '') + cls + '" type="button" data-a="skin" data-id="' + s.id + '"' + dis + '>' +
       '<span class="sw' + (s.rainbow ? ' rb' : '') + '" style="--a:' + cols[0] + ';--b:' + (s.rainbow ? '#b292ff' : cols[1]) + (s.gl ? ';background:linear-gradient(90deg,' + skinGrad(s).join(',') + ')' : '') + '"></span>' +
       '<b>' + escH(s.name) + '</b><small>' + sub + '</small></button>';
   }
   function skinPanel() {
-    var h = panelHead('Skin') + '<div class="pb"><div class="gemrow"><span>💎 <b>' + wallet.gems + '</b> gemme</span><small>Le guadagni giocando, con le missioni e ogni giorno. Le spendi tu, sulla skin che vuoi.</small></div>';
-    h += '<h3 class="pt">Negozio</h3><div class="skins"><button class="skin' + (activeSkin().id === 'base' ? ' on' : '') + '" type="button" data-a="skin" data-id="base"><span class="sw" style="--a:' + C.snake + ';--b:' + C['snake-head'] + '"></span><b>Classico</b><small>' + (activeSkin().id === 'base' ? 'In uso' : 'Tocca per usarla') + '</small></button>';
+    var h = panelHead(T('Skin', 'Skins')) + '<div class="pb"><div class="gemrow"><span>💎 <b>' + wallet.gems + T('</b> gemme</span><small>Le guadagni giocando, con le missioni e ogni giorno. Le spendi tu, sulla skin che vuoi.</small></div>', '</b> gems</span><small>Earn them by playing, with missions and every day. Spend them on any skin you like.</small></div>');
+    h += T('<h3 class="pt">Negozio</h3><div class="skins"><button class="skin', '<h3 class="pt">Shop</h3><div class="skins"><button class="skin') + (activeSkin().id === 'base' ? ' on' : '') + '" type="button" data-a="skin" data-id="base"><span class="sw" style="--a:' + C.snake + ';--b:' + C['snake-head'] + T('"></span><b>Classico</b><small>', '"></span><b>Classic</b><small>') + (activeSkin().id === 'base' ? T('In uso', 'Equipped') : T('Tocca per usarla', 'Tap to use it')) + '</small></button>';
     shopList().forEach(function (s) { h += skinCard(s); });
-    h += '</div><h3 class="pt">Con le imprese</h3><div class="skins">';
+    h += T('</div><h3 class="pt">Con le imprese</h3><div class="skins">', '</div><h3 class="pt">From achievements</h3><div class="skins">');
     SKINS.forEach(function (s) { if (!s.price && s.id !== 'base') h += skinCard(s); });
-    return h + '</div><p class="pnote">Le skin del negozio le compri con le gemme. Quelle con le imprese si sbloccano giocando.</p></div>';
+    return h + T('</div><p class="pnote">Le skin del negozio le compri con le gemme. Quelle con le imprese si sbloccano giocando.</p></div>', '</div><p class="pnote">Shop skins are bought with gems. Achievement skins unlock as you play.</p></div>');
   }
   function misBlock(title, set, pool) {
     var h = '<h3 class="pt">' + title + '</h3>';
     set.m.forEach(function (m) {
-      h += '<div class="mis' + (m.d ? ' done' : '') + '"><b>' + escH(misText(m, pool)) + '</b><div class="bar"><i style="width:' + Math.min(100, Math.round(m.p / m.n * 100)) + '%"></i></div><small>' + (m.d ? 'Completata' : m.p + ' su ' + m.n) + '</small></div>';
+      h += '<div class="mis' + (m.d ? ' done' : '') + '"><b>' + escH(misText(m, pool)) + '</b><div class="bar"><i style="width:' + Math.min(100, Math.round(m.p / m.n * 100)) + '%"></i></div><small>' + (m.d ? T('Completata', 'Completed') : m.p + T(' su ', ' of ') + m.n) + '</small></div>';
     });
     return h;
   }
   function misPanel() {
     if (!daily || daily.date !== todayKey() || !weekly || weekly.date !== weekKey()) loadDaily();
     var st = curStreak();
-    return panelHead('Missioni') + '<div class="pb">' +
-      '<div class="mis streak"><b>Serie: ' + st + (st === 1 ? ' giorno' : ' giorni') + ' di fila</b><small>Record ' + Math.max(statVal('maxStreak'), st) + '. Gioca ogni giorno per tenerla viva: a 3 e a 7 giorni sblocchi due skin.</small></div>' +
-      misBlock('Oggi', daily, MIS) + misBlock('Questa settimana', weekly, MIS_W) +
-      '<p class="pnote">Completate in tutto: ' + statVal('mdone') + ' giornaliere e ' + statVal('wdone') + ' settimanali. Le giornaliere cambiano ogni giorno, le settimanali ogni lunedì.</p></div>';
+    return panelHead(T('Missioni', 'Missions')) + '<div class="pb">' +
+      T('<div class="mis streak"><b>Serie: ', '<div class="mis streak"><b>Streak: ') + st + (st === 1 ? T(' giorno', ' day') : T(' giorni', ' days')) + T(' di fila</b><small>Record ', ' in a row</b><small>Best ') + Math.max(statVal('maxStreak'), st) + T('. Gioca ogni giorno per tenerla viva: a 3 e a 7 giorni sblocchi due skin.</small></div>', '. Play every day to keep it going: at 3 and 7 days you unlock two skins.</small></div>') +
+      misBlock(T('Oggi', 'Today'), daily, MIS) + misBlock(T('Questa settimana', 'This week'), weekly, MIS_W) +
+      T('<p class="pnote">Completate in tutto: ', '<p class="pnote">Completed so far: ') + statVal('mdone') + T(' giornaliere e ', ' daily and ') + statVal('wdone') + T(' settimanali. Le giornaliere cambiano ogni giorno, le settimanali ogni lunedì.</p></div>', ' weekly. Daily missions change every day, weekly ones every Monday.</p></div>');
   }
   function lbChips() {
     return '<div class="seg">' + MODES.map(function (m) { return '<button class="chip' + (m.id === lbMode ? ' on' : '') + '" type="button" data-a="lbmode" data-id="' + m.id + '">' + m.name + '</button>'; }).join('') + '</div>';
   }
   function lbPanel() {
-    var h = panelHead('Classifica') + '<div class="pb">' + lbChips();
+    var h = panelHead(T('Classifica', 'Leaderboard')) + '<div class="pb">' + lbChips();
     if (FIREBASE_CONFIG) {
-      h += '<div class="nick"><input id="nick" type="text" maxlength="14" autocomplete="off" placeholder="Il tuo nome" value="' + escH(myName) + '"><button class="chip" type="button" data-a="savename">Salva</button></div>' +
-        '<div id="lbList"><p class="pnote">Carico…</p></div>' +
-        '<p class="pnote" id="lbNote">' + (myName ? 'A fine partita il tuo punteggio migliore parte da solo.' : 'Scegli un nome per comparire in classifica.') + '</p>';
+      h += T('<div class="nick"><input id="nick" type="text" maxlength="14" autocomplete="off" placeholder="Il tuo nome" value="', '<div class="nick"><input id="nick" type="text" maxlength="14" autocomplete="off" placeholder="Your name" value="') + escH(myName) + T('"><button class="chip" type="button" data-a="savename">Salva</button></div>', '"><button class="chip" type="button" data-a="savename">Save</button></div>') +
+        T('<div id="lbList"><p class="pnote">Carico…</p></div>', '<div id="lbList"><p class="pnote">Loading…</p></div>') +
+        '<p class="pnote" id="lbNote">' + (myName ? T('A fine partita il tuo punteggio migliore parte da solo.', 'At the end of each game your best score is sent automatically.') : T('Scegli un nome per comparire in classifica.', 'Choose a name to appear on the leaderboard.')) + '</p>';
     } else {
       var list = lsJson('snake.local.' + lbMode, []);
       h += '<div id="lbList">';
-      if (!Array.isArray(list) || !list.length) h += '<p class="pnote">Nessuna partita ancora in questa modalità.</p>';
+      if (!Array.isArray(list) || !list.length) h += T('<p class="pnote">Nessuna partita ancora in questa modalità.</p>', '<p class="pnote">No games yet in this mode.</p>');
       else list.forEach(function (e, i) {
         var d = new Date(e.d);
-        h += '<div class="lbrow"><span class="n">' + (i + 1) + '</span><span class="nm">' + d.getDate() + '/' + (d.getMonth() + 1) + ' · livello ' + (e.l || 1) + '</span><span class="sc">' + e.s + '</span></div>';
+        h += '<div class="lbrow"><span class="n">' + (i + 1) + '</span><span class="nm">' + d.getDate() + '/' + (d.getMonth() + 1) + T(' · livello ', ' · level ') + (e.l || 1) + '</span><span class="sc">' + e.s + '</span></div>';
       });
-      h += '</div><p class="pnote">La classifica online non è ancora attiva: qui vedi i tuoi cinque migliori punteggi.</p>';
+      h += T('</div><p class="pnote">La classifica online non è ancora attiva: qui vedi i tuoi cinque migliori punteggi.</p>', '</div><p class="pnote">The online leaderboard is not active yet: here are your five best scores.</p>');
     }
     return h + '</div>';
   }
@@ -1137,10 +1142,10 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       e2.innerHTML = rows.length ? rows.map(function (r, i) {
         return '<div class="lbrow' + (r.me ? ' me' : '') + '"><span class="n">' + (i + 1) + '</span><span class="nm">' + escH(r.name) + '</span><span class="sc">' + r.score + '</span>' +
           (r.me ? '' : '<button class="rep" type="button" data-a="rep" data-id="' + escH(r.id) + '" data-name="' + escH(r.name) + '" aria-label="' + T('Segnala il nome', 'Report this name') + ' ' + escH(r.name) + '">⚑</button>') + '</div>';
-      }).join('') : '<p class="pnote">Ancora nessun punteggio: sii il primo.</p>';
+      }).join('') : T('<p class="pnote">Ancora nessun punteggio: sii il primo.</p>', '<p class="pnote">No scores yet: be the first.</p>');
     }).catch(function () {
       var e2 = document.getElementById('lbList');
-      if (panelKind === 'lb' && e2) e2.innerHTML = '<p class="pnote">Non riesco a caricare la classifica. Controlla la connessione.</p>';
+      if (panelKind === 'lb' && e2) e2.innerHTML = T('<p class="pnote">Non riesco a caricare la classifica. Controlla la connessione.</p>', '<p class="pnote">Can’t load the leaderboard. Check your connection.</p>');
     });
   }
   /* ---------- Salvataggio: esporta / importa tutti i progressi (chiavi snake.*) ---------- */
@@ -1175,9 +1180,9 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   function offerImport(txt) {
     var r = parseSave(txt);
     impPending = r;
-    if (!r) { saveNote('<span style="color:var(--danger)">Questo non è un salvataggio di Snake valido. Controlla di aver scelto il file giusto o di aver copiato tutto il codice.</span>'); return; }
-    var dt = r.date ? new Date(r.date) : null, when = dt && !isNaN(dt) ? ' del ' + dt.getDate() + '/' + (dt.getMonth() + 1) + '/' + dt.getFullYear() : '';
-    saveNote('Salvataggio' + escH(when) + ' pronto. I progressi attuali di questo telefono verranno sostituiti.<div class="savebtns" style="margin-top:8px"><button class="chip warn" type="button" data-a="impok">Sostituisci i progressi</button><button class="chip" type="button" data-a="impno">Annulla</button></div>');
+    if (!r) { saveNote(T('<span style="color:var(--danger)">Questo non è un salvataggio di Snake valido. Controlla di aver scelto il file giusto o di aver copiato tutto il codice.</span>', '<span style="color:var(--danger)">This is not a valid save. Make sure you picked the right file or copied the whole code.</span>')); return; }
+    var dt = r.date ? new Date(r.date) : null, when = dt && !isNaN(dt) ? T(' del ', ' of ') + dt.getDate() + '/' + (dt.getMonth() + 1) + '/' + dt.getFullYear() : '';
+    saveNote(T('Salvataggio', 'Save') + escH(when) + T(' pronto. I progressi attuali di questo telefono verranno sostituiti.<div class="savebtns" style="margin-top:8px"><button class="chip warn" type="button" data-a="impok">Sostituisci i progressi</button><button class="chip" type="button" data-a="impno">Annulla</button></div>', ' ready. The current progress on this phone will be replaced.<div class="savebtns" style="margin-top:8px"><button class="chip warn" type="button" data-a="impok">Replace progress</button><button class="chip" type="button" data-a="impno">Cancel</button></div>'));
   }
   var impFile = document.createElement('input');
   impFile.type = 'file'; impFile.accept = '.json,application/json,text/plain'; impFile.hidden = true;
@@ -1188,7 +1193,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     if (f.size > SAVE_MAX) { offerImport(''); return; }
     var fr = new FileReader();
     fr.onload = function () { offerImport(String(fr.result || '')); };
-    fr.onerror = function () { saveNote('Non riesco a leggere il file.'); };
+    fr.onerror = function () { saveNote(T('Non riesco a leggere il file.', 'Can’t read the file.')); };
     fr.readAsText(f);
   });
   function exportFile() {
@@ -1196,7 +1201,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     try {
       var file = new File([txt], name, { type: 'application/json' });
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({ files: [file], title: 'Salvataggio Snake' }).then(function () { saveNote('Salvataggio condiviso.'); }, function (err) { if (err && err.name !== 'AbortError') saveNote('Condivisione non riuscita: prova con «Copia codice».'); });
+        navigator.share({ files: [file], title: T('Salvataggio Snake', 'Snake Gems save') }).then(function () { saveNote(T('Salvataggio condiviso.', 'Save shared.')); }, function (err) { if (err && err.name !== 'AbortError') saveNote(T('Condivisione non riuscita: prova con «Copia codice».', 'Sharing failed: try “Copy code”.')); });
         return;
       }
     } catch (e) {}
@@ -1204,25 +1209,25 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       var a = document.createElement('a'), url = URL.createObjectURL(new Blob([txt], { type: 'application/json' }));
       a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
-      saveNote('Download di «' + name + '» avviato. Se il file non compare tra i download, usa «Copia codice».');
-    } catch (e) { saveNote('Non riesco a salvare il file: usa «Copia codice».'); }
+      saveNote(T('Download di «', 'Download of «') + name + T('» avviato. Se il file non compare tra i download, usa «Copia codice».', '» started. If the file doesn’t show up in your downloads, use “Copy code”.'));
+    } catch (e) { saveNote(T('Non riesco a salvare il file: usa «Copia codice».', 'Can’t save the file: use “Copy code”.')); }
   }
   function exportCopy() {
     var txt = saveData(), ta = document.getElementById('impTxt');
-    var fallback = function () { if (ta) { ta.value = txt; ta.focus(); ta.select(); } saveNote('Il codice è nel riquadro qui sopra, già selezionato: copialo e conservalo (per esempio in una nota o una mail a te stesso).'); };
+    var fallback = function () { if (ta) { ta.value = txt; ta.focus(); ta.select(); } saveNote(T('Il codice è nel riquadro qui sopra, già selezionato: copialo e conservalo (per esempio in una nota o una mail a te stesso).', 'The code is in the box above, already selected: copy it and keep it somewhere (a note or an email to yourself).')); };
     try {
-      navigator.clipboard.writeText(txt).then(function () { saveNote('Codice copiato. Incollalo in una nota o in una mail a te stesso per conservarlo.'); }, fallback);
+      navigator.clipboard.writeText(txt).then(function () { saveNote(T('Codice copiato. Incollalo in una nota o in una mail a te stesso per conservarlo.', 'Code copied. Paste it into a note or an email to yourself to keep it.')); }, fallback);
     } catch (e) { fallback(); }
   }
   function savePanel() {
-    return panelHead('Salvataggio') + '<div class="pb">' +
-      '<p class="pnote">Porta gemme, skin, record, missioni e preferenze su un altro telefono, o tienine una copia di sicurezza.</p>' +
-      '<h3 class="pt">Esporta</h3><div class="savebtns"><button class="chip pri" type="button" data-a="expfile">Salva file</button><button class="chip" type="button" data-a="expcopy">Copia codice</button></div>' +
-      '<h3 class="pt">Importa</h3><div class="savebtns"><button class="chip" type="button" data-a="impfile">Apri file</button></div>' +
-      '<textarea id="impTxt" spellcheck="false" autocomplete="off" placeholder="…oppure incolla qui il codice copiato"></textarea>' +
-      '<div class="savebtns"><button class="chip" type="button" data-a="imppaste">Importa il codice incollato</button></div>' +
+    return panelHead(T('Salvataggio', 'Save')) + '<div class="pb">' +
+      T('<p class="pnote">Porta gemme, skin, record, missioni e preferenze su un altro telefono, o tienine una copia di sicurezza.</p>', '<p class="pnote">Move gems, skins, records, missions and settings to another phone, or keep a backup copy.</p>') +
+      T('<h3 class="pt">Esporta</h3><div class="savebtns"><button class="chip pri" type="button" data-a="expfile">Salva file</button><button class="chip" type="button" data-a="expcopy">Copia codice</button></div>', '<h3 class="pt">Export</h3><div class="savebtns"><button class="chip pri" type="button" data-a="expfile">Save file</button><button class="chip" type="button" data-a="expcopy">Copy code</button></div>') +
+      T('<h3 class="pt">Importa</h3><div class="savebtns"><button class="chip" type="button" data-a="impfile">Apri file</button></div>', '<h3 class="pt">Import</h3><div class="savebtns"><button class="chip" type="button" data-a="impfile">Open file</button></div>') +
+      T('<textarea id="impTxt" spellcheck="false" autocomplete="off" placeholder="…oppure incolla qui il codice copiato"></textarea>', '<textarea id="impTxt" spellcheck="false" autocomplete="off" placeholder="…or paste the copied code here"></textarea>') +
+      T('<div class="savebtns"><button class="chip" type="button" data-a="imppaste">Importa il codice incollato</button></div>', '<div class="savebtns"><button class="chip" type="button" data-a="imppaste">Import pasted code</button></div>') +
       '<p class="pnote" id="saveNote"></p>' +
-      '<p class="pnote">La posizione in classifica resta legata a questo telefono: sull’altro il tuo record viene reinviato a fine partita.</p>' +
+      T('<p class="pnote">La posizione in classifica resta legata a questo telefono: sull’altro il tuo record viene reinviato a fine partita.</p>', '<p class="pnote">Your leaderboard entry stays tied to this phone: on the other one your best score is sent again after a game.</p>') +
       '<h3 class="pt">' + T('I tuoi dati', 'Your data') + '</h3>' +
       '<p class="pnote">' + T('Cancella il nickname e i punteggi dalla classifica online e tutti i progressi da questo telefono (gemme, skin, record). Non si può annullare: se vuoi, prima esporta il salvataggio.', 'Deletes your nickname and scores from the online leaderboard and all progress on this phone (gems, skins, records). This cannot be undone: export your save first if you want to keep it.') + '</p>' +
       '<div class="savebtns"><button class="chip warn" type="button" data-a="delme">' + T('Elimina i miei dati', 'Delete my data') + '</button></div>' +
@@ -1256,7 +1261,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     else if (a === 'impfile') { impFile.value = ''; impFile.click(); }
     else if (a === 'imppaste') { var tx = document.getElementById('impTxt'); offerImport(tx ? tx.value.trim() : ''); }
     else if (a === 'impno') { impPending = null; saveNote(''); }
-    else if (a === 'impok') { if (impPending && !applySave(impPending.data)) saveNote('Non riesco a scrivere i dati su questo dispositivo.'); }
+    else if (a === 'impok') { if (impPending && !applySave(impPending.data)) saveNote(T('Non riesco a scrivere i dati su questo dispositivo.', 'Can’t write data on this device.')); }
     else if (a === 'delme') {
       if (!delArm) { delArm = true; b.textContent = T('Tocca ancora: cancello tutto', 'Tap again: delete everything'); return; }
       delArm = false; b.disabled = true; deleteMyData();
@@ -1272,7 +1277,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       if (ne) { if (note) note.textContent = ne; }
       else {
         setNick(nv);
-        if (note) note.textContent = 'Nickname salvato.';
+        if (note) note.textContent = T('Nickname salvato.', 'Nickname saved.');
         setTimeout(fillLb, 900);
       }
     }
@@ -1478,7 +1483,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     SKINS.forEach(function (s, i) { if (skinOk(s) && !snapOk[i]) { newSkins.push(s.name); newSkinIds.push(s.id); } });
     newSkinIds.forEach(function (id) {
       var sk = skinById(id);
-      notify({ icon: '🎨', title: 'Nuova skin: «' + sk.name + '»', text: 'Sbloccata con un’impresa. La vuoi usare subito?', actions: [{ label: 'Usala ora', pri: true, fn: function () { skinId = id; lsSet('snake.skin', id); } }] });
+      notify({ icon: '🎨', title: T('Nuova skin: «', 'New skin: «') + sk.name + '»', text: T('Sbloccata con un’impresa. La vuoi usare subito?', 'Unlocked with an achievement. Use it now?'), actions: [{ label: T('Usala ora', 'Use it now'), pri: true, fn: function () { skinId = id; lsSet('snake.skin', id); } }] });
     });
     checkAfford();
     if (score > 0) submitScore(mode, score, level);
@@ -1533,8 +1538,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 
   function levelUp() {
     level++;
-    bannerText = 'Livello ' + level;
-    bannerSub = (level === 5 && mode !== 'turbo') ? 'Arrivano i mostri!' : '';
+    bannerText = T('Livello ', 'Level ') + level;
+    bannerSub = (level === 5 && mode !== 'turbo') ? T('Arrivano i mostri!', 'Monsters are coming!') : '';
     bannerAt = performance.now();
     ring(COLS / 2, ROWS / 2, C.ink, Math.max(COLS, ROWS) * 0.75, 700); flash(C.ink, 220);
     SFX.level();
@@ -1709,7 +1714,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
         slowUntil = gt + 5000;
         burst(hx + 0.5, hy + 0.5, C.slow, 14, 0.006);
         ring(hx + 0.5, hy + 0.5, C.slow, 3, 450);
-        floatText(hx + 0.5, hy + 0.2, 'Rallenta', C.slow);
+        floatText(hx + 0.5, hy + 0.2, T('Rallenta', 'Slow'), C.slow);
         SFX.slow();
         buzz(20);
       } else {
@@ -1718,7 +1723,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
         if (k > 0) snake.length = snake.length - k;
         burst(hx + 0.5, hy + 0.5, C.cut, 14, 0.006);
         ring(hx + 0.5, hy + 0.5, C.cut, 3, 450);
-        floatText(hx + 0.5, hy + 0.2, 'Accorcia', C.cut);
+        floatText(hx + 0.5, hy + 0.2, T('Accorcia', 'Shorter'), C.cut);
         SFX.cut();
         buzz(20);
       }
@@ -1754,11 +1759,11 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     pauseBtn.disabled = state !== 'running';
     var idle = state === 'ready' || state === 'over';
     padBtn.disabled = !idle;
-    soundBtn.textContent = muted ? 'Effetti: no' : 'Effetti: sì';
-    musicBtn.textContent = musicOn ? 'Musica: sì' : 'Musica: no';
+    soundBtn.textContent = muted ? T('Effetti: no', 'Sound: off') : T('Effetti: sì', 'Sound: on');
+    musicBtn.textContent = musicOn ? T('Musica: sì', 'Music: on') : T('Musica: no', 'Music: off');
     volBtn.textContent = 'Volume: ' + MUSIC_NAMES[mvol];
     volBtn.disabled = !musicOn;
-    padBtn.textContent = padOn ? 'Pad: sì' : 'Pad: no';
+    padBtn.textContent = padOn ? T('Pad: sì', 'Pad: on') : T('Pad: no', 'Pad: off');
     each4(modeSeg.children, function (b) {
       var on = b.getAttribute('data-mode') === mode;
       b.classList.toggle('on', on);
@@ -1767,17 +1772,17 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     modeDesc.textContent = modeOf(mode).desc;
     overlay.hidden = state === 'running';
     overlay.style.touchAction = overlay.scrollHeight > overlay.clientHeight + 2 ? 'pan-y' : 'none';
-    playBtn.textContent = state === 'paused' ? 'Riprendi' : (state === 'over' ? 'Rigioca' : 'Gioca');
+    playBtn.textContent = state === 'paused' ? T('Riprendi', 'Resume') : (state === 'over' ? T('Rigioca', 'Play again') : T('Gioca', 'Play'));
     if (state === 'ready') {
-      ovTitle.textContent = 'Pronto?';
-      ovSub.textContent = 'Tocca lo schermo per iniziare. Tocca dove vuoi andare, o scorri il dito';
+      ovTitle.textContent = T('Pronto?', 'Ready?');
+      ovSub.textContent = T('Tocca lo schermo per iniziare. Tocca dove vuoi andare, o scorri il dito', 'Tap the screen to start. Tap where you want to go, or swipe');
     } else if (state === 'paused') {
-      ovTitle.textContent = 'In pausa';
-      ovSub.textContent = 'Tocca lo schermo per riprendere';
+      ovTitle.textContent = T('In pausa', 'Paused');
+      ovSub.textContent = T('Tocca lo schermo per riprendere', 'Tap the screen to resume');
     } else if (state === 'over') {
-      ovTitle.textContent = endReason === 'time' ? 'Tempo scaduto!' : (won ? 'Hai vinto!' : 'Fine partita');
-      ovSub.textContent = 'Livello ' + level + ', ' + score + ' punti. ' + (newBest ? 'Nuovo record!' : 'Record: ' + best + '.') +
-        (lastGems ? ' +' + lastGems + ' gemme.' : '') + (newSkins.length ? ' Nuova skin: ' + newSkins.join(', ') + '.' : '') + ' Tocca per rigiocare.';
+      ovTitle.textContent = endReason === 'time' ? T('Tempo scaduto!', 'Time’s up!') : (won ? T('Hai vinto!', 'You won!') : T('Fine partita', 'Game over'));
+      ovSub.textContent = T('Livello ', 'Level ') + level + ', ' + score + T(' punti. ', ' points. ') + (newBest ? T('Nuovo record!', 'New best!') : T('Record: ', 'Best: ') + best + '.') +
+        (lastGems ? ' +' + lastGems + T(' gemme.', ' gems.') : '') + (newSkins.length ? T(' Nuova skin: ', ' New skin: ') + newSkins.join(', ') + '.' : '') + T(' Tocca per rigiocare.', ' Tap to play again.');
     }
     refreshGems();
     scheduleEndNotifs();
@@ -2057,9 +2062,9 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 
     // effetti attivi
     var row = 0;
-    if (slowUntil > gt && state !== 'ready') drawPill('Rallentato ' + Math.ceil((slowUntil - gt) / 1000) + 's', C.slow, row++);
-    if (powerUntil > gt && state !== 'ready') drawPill('Potere ' + Math.ceil((powerUntil - gt) / 1000) + 's', C.bonus, row++);
-    if (modeOf(mode).time && state !== 'ready') drawPill('Tempo ' + fmtTime(timeLeft), timeLeft < 10000 ? C.danger : C.snake, row++);
+    if (slowUntil > gt && state !== 'ready') drawPill(T('Rallentato ', 'Slowed ') + Math.ceil((slowUntil - gt) / 1000) + 's', C.slow, row++);
+    if (powerUntil > gt && state !== 'ready') drawPill(T('Potere ', 'Power ') + Math.ceil((powerUntil - gt) / 1000) + 's', C.bonus, row++);
+    if (modeOf(mode).time && state !== 'ready') drawPill(T('Tempo ', 'Time ') + fmtTime(timeLeft), timeLeft < 10000 ? C.danger : C.snake, row++);
 
     // banner di livello
     var bt = t - bannerAt;
@@ -2300,7 +2305,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     if (er) { document.getElementById('werr').textContent = er; return; }
     setNick(v);
     welcomeEl.hidden = true;
-    notify({ icon: '🐍', title: 'Ciao, ' + v + '!', text: 'Sei in classifica: il tuo record parte da solo a fine partita.', actions: [] });
+    notify({ icon: '🐍', title: T('Ciao, ', 'Hi, ') + v + '!', text: T('Sei in classifica: il tuo record parte da solo a fine partita.', 'You’re on the leaderboard: your best score is sent after each game.'), actions: [] });
     loginCheck();
   });
   document.getElementById('wnick').addEventListener('input', function () { document.getElementById('werr').textContent = ''; });
@@ -2428,13 +2433,14 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
   // Aggiornamenti: quando una nuova versione è pronta lo dice, e ricarica solo fuori dalla partita
   (function () {
+    var EN = !/^it\b/i.test((navigator.languages && navigator.languages[0]) || navigator.language || 'it');
     var sw = navigator.serviceWorker, hadCtrl = !!sw.controller, waiting = null, asked = false, reloading = false;
     var busy = function () { return window.__snakeBusy ? window.__snakeBusy() : false; };
     function activate() { if (waiting) waiting.postMessage("SKIP_WAITING"); }
     function offer(w) {
       if (!w || !hadCtrl || asked) return;
       waiting = w; asked = true;
-      if (window.__snakeNotify) window.__snakeNotify({ icon: "✨", title: "Nuova versione disponibile", text: "Tocca «Aggiorna ora», oppure si aggiorna da sola alla fine della prossima partita.", actions: [{ label: "Aggiorna ora", pri: true, fn: activate }] });
+      if (window.__snakeNotify) window.__snakeNotify({ icon: "✨", title: EN ? "New version available" : "Nuova versione disponibile", text: EN ? "Tap “Update now”, or it will update by itself after your next game." : "Tocca «Aggiorna ora», oppure si aggiorna da sola alla fine della prossima partita.", actions: [{ label: EN ? "Update now" : "Aggiorna ora", pri: true, fn: activate }] });
       var was = busy();
       setInterval(function () { var b = busy(); if (was && !b) activate(); was = b; }, 1000);
     }

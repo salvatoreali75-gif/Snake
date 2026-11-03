@@ -1,7 +1,7 @@
 {
-  "name": "Snake",
-  "short_name": "Snake",
-  "description": "Snake moderno: livelli, bonus e suoni. Giocabile anche offline.",
+  "name": "Snake Gems",
+  "short_name": "Snake Gems",
+  "description": "Snake moderno con gemme, skin, missioni e classifica. Modern snake with gems, skins, missions and leaderboard.",
   "lang": "it",
   "start_url": "./",
   "scope": "./",
