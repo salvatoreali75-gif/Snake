@@ -19,7 +19,19 @@ service cloud.firestore {
         && request.resource.data.level >= 1
         && request.resource.data.level <= 99
         && request.resource.data.at == request.time;
-      allow delete: if false;
+      // «Elimina i miei dati»: ognuno può cancellare solo il proprio punteggio
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+    // Segnalazioni di nickname: chiunque abbia fatto l'accesso può crearne, nessuno può leggerle dall'app (le vedi tu nella console)
+    match /reports/{id} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['mode', 'uid', 'name', 'by', 'at'])
+        && request.resource.data.by == request.auth.uid
+        && request.resource.data.mode in ['classic', 'timed', 'turbo', 'open']
+        && request.resource.data.uid is string && request.resource.data.uid.size() <= 128
+        && request.resource.data.name is string && request.resource.data.name.size() <= 14
+        && request.resource.data.at == request.time;
+      allow read, update, delete: if false;
     }
     match /{document=**} {
       allow read, write: if false;

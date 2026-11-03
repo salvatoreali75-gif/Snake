@@ -283,6 +283,10 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 .nick { display: flex; gap: 8px; }
 .nick input { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--btn); color: var(--ink); -webkit-user-select: text; user-select: text; }
 .pnote { margin: 0; font-size: 0.78rem; color: var(--muted); }
+.pnote a, .wbox a { color: var(--snake); font-weight: 700; }
+.lbrow .rep { flex: none; font: inherit; font-size: 0.75rem; border: 0; background: none; color: var(--muted); padding: 2px 6px; cursor: pointer; }
+.lbrow .rep.arm { color: var(--danger); font-weight: 800; }
+.wskip { font: inherit; border: 0; background: none; color: var(--muted); text-decoration: underline; padding: 8px; cursor: pointer; }
 .pb textarea { font: 12px/1.4 var(--font-mono); min-height: 84px; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--btn); color: var(--ink); resize: vertical; -webkit-user-select: text; user-select: text; }
 .savebtns { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip.pri { background: var(--snake); color: var(--board); border-color: var(--snake); }
@@ -406,12 +410,17 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     <button class="btn play" id="wgo" type="submit">Entra in classifica</button>
     <ul><li>💎 Guadagni gemme giocando, con le missioni e ogni giorno</li><li>🎨 Le spendi tu per sbloccare le skin che vuoi</li><li>🏆 Il tuo record va in classifica da solo</li></ul>
     <p class="pnote">Da 3 a 14 caratteri. Lo puoi cambiare dalla Classifica.</p>
+    <button class="wskip" type="button" id="wskip">Più tardi: gioca senza classifica</button>
+    <p class="pnote"><a href="privacy.html" target="_blank" rel="noopener" id="wpriv">Informativa privacy</a></p>
   </form>
 </div>
 
 <script>
 (function () {
   'use strict';
+  var LANG = (function () { var l = (navigator.languages && navigator.languages[0]) || navigator.language || 'it'; return /^it\b/i.test(l) ? 'it' : 'en'; })();
+  function T(it, en) { return LANG === 'it' ? it : en; }
+  document.documentElement.lang = LANG;
   var COLS = 20, ROWS = 20;           // la griglia si adatta allo schermo (colonne fisse, righe in base all'altezza)
   var MIN_ROWS = 16, MAX_ROWS = 40;
   var FOODS_PER_LEVEL = 5;
@@ -741,8 +750,20 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   /* ---------- Benvenuto: nickname al primo accesso ---------- */
   var welcomeEl = document.getElementById('welcome');
   function cleanNick(v) { return String(v || '').replace(/[\u0000-\u001F<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 14); }
+  // Filtro nickname: parole offensive in italiano e inglese, anche scritte con numeri (c4zz0) o spezzate (c.a.z.z.o)
+  var BAD_SUB = ['cazz', 'minchi', 'merd', 'stronz', 'vaffancul', 'fancul', 'puttan', 'troia', 'zoccol', 'frocio', 'froci', 'coglion', 'porcodio', 'diocane', 'diomaiale', 'porcamadonna', 'madonnaputt', 'bastard', 'culatton', 'ricchion', 'mignott', 'pompin', 'inculat',
+    'fuck', 'shit', 'bitch', 'cunt', 'nigg', 'faggot', 'retard', 'whore', 'slut', 'asshole', 'nazi', 'hitler', 'porn', 'pussy', 'penis', 'vagina', 'dildo', 'wanker', 'motherf'];
+  var BAD_WORD = ['fica', 'figa', 'sega', 'seghe', 'troie', 'cock', 'dick', 'sex', 'rape', 'negro', 'negri', 'negra', 'fag', 'tette', 'culo', 'anal', 'kkk'];
+  function badName(v) {
+    var n = String(v || '').toLowerCase().replace(/[0@4]/g, function (c) { return c === '0' ? 'o' : 'a'; }).replace(/1|!/g, 'i').replace(/3/g, 'e').replace(/5|\$/g, 's').replace(/7/g, 't')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    var squash = n.replace(/[^a-z]/g, '');
+    if (BAD_SUB.some(function (w) { return squash.indexOf(w) > -1; })) return true;
+    return n.split(/[^a-z]+/).some(function (t) { return BAD_WORD.indexOf(t) > -1; });
+  }
   function nickError(v) {
     if (v.length < 3) return 'Scrivi almeno 3 caratteri.';
+    if (badName(v)) return T('Questo nome non è permesso: scegline un altro.', 'This name is not allowed: please choose another one.');
     if (!/^[A-Za-z0-9À-ɏ _.\-]+$/.test(v)) return 'Usa solo lettere, numeri, spazio, punto, trattino o underscore.';
     return '';
   }
@@ -969,7 +990,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     fbP = Promise.all([import(B + 'firebase-app.js'), import(B + 'firebase-auth.js'), import(B + 'firebase-firestore.js')]).then(function (m) {
       var app = m[0].initializeApp(FIREBASE_CONFIG), auth = m[1].getAuth(app), fs = m[2].getFirestore(app);
       return m[1].signInAnonymously(auth).then(function (cred) {
-        return { fs: fs, m: m[2], uid: (cred && cred.user) ? cred.user.uid : auth.currentUser.uid };
+        return { fs: fs, m: m[2], auth: auth, uid: (cred && cred.user) ? cred.user.uid : auth.currentUser.uid };
       });
     });
     fbP.catch(function () { fbP = null; });
@@ -994,11 +1015,50 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       var q = f.m.query(f.m.collection(f.fs, 'modes/' + mid + '/scores'), f.m.orderBy('score', 'desc'), f.m.limit(10));
       return f.m.getDocs(q).then(function (snap) {
         var out = [];
-        snap.forEach(function (d) { var v = d.data(); out.push({ name: String(v.name || '?'), score: Number(v.score) || 0, me: d.id === f.uid }); });
+        var hid = lsJson('snake.hidden', {});
+        snap.forEach(function (d) {
+          if (hid[d.id] && d.id !== f.uid) return;
+          var v = d.data(), nm = String(v.name || '?');
+          out.push({ id: d.id, name: badName(nm) ? T('Giocatore', 'Player') : nm, score: Number(v.score) || 0, me: d.id === f.uid });
+        });
         return out;
       });
     });
   }
+  // Segnalazione di un nickname: arriva in Firebase (collezione reports, leggibile solo dal titolare) e il nome sparisce da questo telefono
+  function sendReport(mid, uid, name) {
+    var hid = lsJson('snake.hidden', {});
+    hid[uid] = 1; lsSet('snake.hidden', JSON.stringify(hid));
+    if (!FIREBASE_CONFIG) return;
+    fbReady().then(function (f) {
+      return f.m.addDoc(f.m.collection(f.fs, 'reports'), { mode: mid, uid: uid, name: String(name).slice(0, 14), by: f.uid, at: f.m.serverTimestamp() });
+    }).catch(function () {});
+  }
+  // Elimina i miei dati: punteggi online, account anonimo e tutti i dati di questo telefono
+  function deleteOnline() {
+    return fbReady().then(function (f) {
+      return Promise.all(MODES.map(function (m) { return f.m.deleteDoc(f.m.doc(f.fs, 'modes/' + m.id + '/scores/' + f.uid)); })).then(function () {
+        var u = f.auth && f.auth.currentUser;
+        return u ? u.delete().catch(function () {}) : null;
+      });
+    });
+  }
+  function deleteMyData() {
+    saveNote(T('Cancello i tuoi dati…', 'Deleting your data…'));
+    function wipeLocal(online) {
+      try {
+        var rm = [];
+        for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf('snake.') === 0) rm.push(k); }
+        rm.forEach(function (k) { localStorage.removeItem(k); });
+      } catch (e) {}
+      if (!online) lsSet('snake.delpending', '1');   // offline: la parte online si cancella al prossimo avvio con connessione
+      lsSet('snake.deleted', online ? 'ok' : 'later');
+      location.reload();
+    }
+    if (!FIREBASE_CONFIG) { wipeLocal(true); return; }
+    deleteOnline().then(function () { wipeLocal(true); }, function () { wipeLocal(false); });
+  }
+  var delArm = false;
   function pushLocal(mid, sc, lvl) {
     var list = lsJson('snake.local.' + mid, []);
     if (!Array.isArray(list)) list = [];
@@ -1075,7 +1135,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       var e2 = document.getElementById('lbList');
       if (panelKind !== 'lb' || lbMode !== mid || !e2) return;
       e2.innerHTML = rows.length ? rows.map(function (r, i) {
-        return '<div class="lbrow' + (r.me ? ' me' : '') + '"><span class="n">' + (i + 1) + '</span><span class="nm">' + escH(r.name) + '</span><span class="sc">' + r.score + '</span></div>';
+        return '<div class="lbrow' + (r.me ? ' me' : '') + '"><span class="n">' + (i + 1) + '</span><span class="nm">' + escH(r.name) + '</span><span class="sc">' + r.score + '</span>' +
+          (r.me ? '' : '<button class="rep" type="button" data-a="rep" data-id="' + escH(r.id) + '" data-name="' + escH(r.name) + '" aria-label="' + T('Segnala il nome', 'Report this name') + ' ' + escH(r.name) + '">⚑</button>') + '</div>';
       }).join('') : '<p class="pnote">Ancora nessun punteggio: sii il primo.</p>';
     }).catch(function () {
       var e2 = document.getElementById('lbList');
@@ -1161,11 +1222,16 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       '<textarea id="impTxt" spellcheck="false" autocomplete="off" placeholder="…oppure incolla qui il codice copiato"></textarea>' +
       '<div class="savebtns"><button class="chip" type="button" data-a="imppaste">Importa il codice incollato</button></div>' +
       '<p class="pnote" id="saveNote"></p>' +
-      '<p class="pnote">La posizione in classifica resta legata a questo telefono: sull’altro il tuo record viene reinviato a fine partita.</p></div>';
+      '<p class="pnote">La posizione in classifica resta legata a questo telefono: sull’altro il tuo record viene reinviato a fine partita.</p>' +
+      '<h3 class="pt">' + T('I tuoi dati', 'Your data') + '</h3>' +
+      '<p class="pnote">' + T('Cancella il nickname e i punteggi dalla classifica online e tutti i progressi da questo telefono (gemme, skin, record). Non si può annullare: se vuoi, prima esporta il salvataggio.', 'Deletes your nickname and scores from the online leaderboard and all progress on this phone (gems, skins, records). This cannot be undone: export your save first if you want to keep it.') + '</p>' +
+      '<div class="savebtns"><button class="chip warn" type="button" data-a="delme">' + T('Elimina i miei dati', 'Delete my data') + '</button></div>' +
+      '<p class="pnote"><a href="privacy.html" target="_blank" rel="noopener">' + T('Informativa privacy', 'Privacy policy') + '</a></p></div>';
   }
   function openPanel(kind) {
     panelKind = kind;
     impPending = null;
+    delArm = false;
     panel.innerHTML = kind === 'skin' ? skinPanel() : (kind === 'mis' ? misPanel() : (kind === 'save' ? savePanel() : lbPanel()));
     panel.hidden = false;
     if (kind === 'lb') fillLb();
@@ -1191,6 +1257,15 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     else if (a === 'imppaste') { var tx = document.getElementById('impTxt'); offerImport(tx ? tx.value.trim() : ''); }
     else if (a === 'impno') { impPending = null; saveNote(''); }
     else if (a === 'impok') { if (impPending && !applySave(impPending.data)) saveNote('Non riesco a scrivere i dati su questo dispositivo.'); }
+    else if (a === 'delme') {
+      if (!delArm) { delArm = true; b.textContent = T('Tocca ancora: cancello tutto', 'Tap again: delete everything'); return; }
+      delArm = false; b.disabled = true; deleteMyData();
+    }
+    else if (a === 'rep') {
+      if (!b.classList.contains('arm')) { b.classList.add('arm'); b.textContent = T('Segnala?', 'Report?'); return; }
+      sendReport(lbMode, id, b.getAttribute('data-name') || '');
+      var row = b.closest('.lbrow'); if (row) row.innerHTML = '<span class="nm">' + T('Segnalato, grazie. Non lo vedrai più.', 'Reported, thank you. You won’t see it again.') + '</span>';
+    }
     else if (a === 'savename') {
       var inp = document.getElementById('nick');
       var nv = cleanNick(inp ? inp.value : ''), ne = nickError(nv), note = document.getElementById('lbNote');
@@ -2229,6 +2304,11 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     loginCheck();
   });
   document.getElementById('wnick').addEventListener('input', function () { document.getElementById('werr').textContent = ''; });
+  document.getElementById('wskip').addEventListener('click', function () {
+    lsSet('snake.nickok', '1');
+    welcomeEl.hidden = true;
+    loginCheck();
+  });
   misBtn.addEventListener('click', function () { openPanel('mis'); });
   lbBtn.addEventListener('click', function () { lbMode = mode; openPanel('lb'); });
   $('saveBtn').addEventListener('click', function () { openPanel('save'); });
@@ -2320,8 +2400,24 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   loadColors();
   document.body.classList.toggle('pad-on', padOn);
   reset();
+  var delMsg = lsGet('snake.deleted', '');
+  if (delMsg) {
+    try { localStorage.removeItem('snake.deleted'); } catch (e) {}
+    document.getElementById('wtext').textContent = delMsg === 'ok'
+      ? T('I tuoi dati sono stati cancellati. Se vuoi, scegli un nuovo nickname.', 'Your data has been deleted. Choose a new nickname if you like.')
+      : T('I dati di questo telefono sono stati cancellati; quelli online verranno cancellati appena c’è connessione.', 'Data on this phone has been deleted; online data will be deleted as soon as you are connected.');
+  }
+  if (lsGet('snake.delpending', '') === '1' && FIREBASE_CONFIG) deleteOnline().then(function () { try { localStorage.removeItem('snake.delpending'); } catch (e) {} }, function () {});
   if (FIREBASE_CONFIG && lsGet('snake.nickok', '0') !== '1') showWelcome(); else loginCheck();
   document.addEventListener('visibilitychange', function () { if (!document.hidden && welcomeEl.hidden) { loginCheck(); refreshUI(); } });
+  // Tasto Indietro di Android (lo chiama il guscio dell'app): true se il gioco l'ha usato, false se l'app può uscire
+  window.__snakeBack = function () {
+    if (!welcomeEl.hidden) return false;
+    if (notifCur) { closeNotif(notifCur); return true; }
+    if (!panel.hidden) { closePanel(); return true; }
+    if (state === 'running') { pause(); return true; }
+    return false;
+  };
   // per l'avviso di aggiornamento: partita in corso? e notifiche del gioco
   window.__snakeBusy = function () { return state === 'running' || state === 'paused'; };
   window.__snakeNotify = notify;
