@@ -1,0 +1,11 @@
+{
+  "appId": "io.github.salvatoreali75.snakegems",
+  "appName": "Snake Gems",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#0E151C"
+  },
+  "plugins": {
+    "AdMob": {}
+  }
+}

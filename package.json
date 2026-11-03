@@ -1,0 +1,19 @@
+{
+  "name": "snake-gems",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Snake Gems: app Android (Capacitor) costruita dal gioco web",
+  "scripts": {
+    "build:web": "node tools/build-web.mjs",
+    "sync": "npm run build:web && npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor-community/admob": "^8.3.0",
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.0"
+  }
+}

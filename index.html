@@ -116,7 +116,8 @@ header { flex: none; display: flex; justify-content: space-between; align-items:
 h1 {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.75rem;
+  font-size: clamp(1.25rem, 6.2vw, 1.75rem);
+  white-space: nowrap;
   line-height: 1;
   letter-spacing: -0.02em;
   margin: 0;
@@ -284,6 +285,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 .nick input { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--btn); color: var(--ink); -webkit-user-select: text; user-select: text; }
 .pnote { margin: 0; font-size: 0.78rem; color: var(--muted); }
 .pnote a, .wbox a { color: var(--snake); font-weight: 700; }
+.btn.adbtn { border-color: var(--bonus); color: var(--bonus); font-weight: 800; }
 .lbrow .rep { flex: none; font: inherit; font-size: 0.75rem; border: 0; background: none; color: var(--muted); padding: 2px 6px; cursor: pointer; }
 .lbrow .rep.arm { color: var(--danger); font-weight: 800; }
 .wskip { font: inherit; border: 0; background: none; color: var(--muted); text-decoration: underline; padding: 8px; cursor: pointer; }
@@ -355,6 +357,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
           <p class="ov-title" id="ovTitle">Pronto?</p>
           <p class="ov-sub" id="ovSub">Tocca lo schermo per iniziare</p>
           <button class="btn play" id="playBtn" type="button">Gioca</button>
+          <button class="btn adbtn" id="adBtn" type="button" hidden></button>
           <div class="seg" id="modeSeg"></div>
           <p class="mdesc" id="modeDesc"></p>
           <div class="ov-tools">
@@ -434,15 +437,20 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   var scoreEl = $('score'), bestEl = $('best'), levelEl = $('level');
   var overlay = $('overlay'), ovTitle = $('ovTitle'), ovSub = $('ovSub');
   var pauseBtn = $('pauseBtn'), soundBtn = $('soundBtn'), musicBtn = $('musicBtn'), volBtn = $('volBtn'), padBtn = $('padBtn'), fsBtn = $('fsBtn');
-  var playBtn = $('playBtn'), skinBtn = $('skinBtn'), misBtn = $('misBtn'), lbBtn = $('lbBtn'), modeSeg = $('modeSeg'), modeDesc = $('modeDesc');
+  var adBtn = $('adBtn'), playBtn = $('playBtn'), skinBtn = $('skinBtn'), misBtn = $('misBtn'), lbBtn = $('lbBtn'), modeSeg = $('modeSeg'), modeDesc = $('modeDesc');
   var rootEl = document.documentElement;
+  var NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  // ID di PROVA di Google: prima della pubblicazione vanno sostituiti con quelli del tuo account AdMob
+  var ADS = { on: false, privacy: false, inter: 'ca-app-pub-3940256099942544/1033173712', reward: 'ca-app-pub-3940256099942544/5224354917',
+    interOk: false, rewardOk: false, games: 0, lastInter: Date.now(), after: null, GEMS: 20, PER_DAY: 5, EVERY: 3, GAP: 120000 };
+  var AdMob = NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob;
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---------- Schermo intero ---------- */
   function fsEl() { return document.fullscreenElement || document.webkitFullscreenElement || null; }
   var standalone = (window.matchMedia && (window.matchMedia('(display-mode: fullscreen)').matches || window.matchMedia('(display-mode: standalone)').matches)) || window.navigator.standalone === true;
   var canFs = !!(rootEl.requestFullscreen || rootEl.webkitRequestFullscreen);
-  fsBtn.hidden = !canFs || standalone;
+  fsBtn.hidden = !canFs || standalone || NATIVE;
   fsBtn.addEventListener('click', function () {
     if (fsEl()) {
       (document.exitFullscreen || document.webkitExitFullscreen).call(document);
@@ -1092,6 +1100,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   function skinPanel() {
     var h = panelHead(T('Skin', 'Skins')) + '<div class="pb"><div class="gemrow"><span>💎 <b>' + wallet.gems + T('</b> gemme</span><small>Le guadagni giocando, con le missioni e ogni giorno. Le spendi tu, sulla skin che vuoi.</small></div>', '</b> gems</span><small>Earn them by playing, with missions and every day. Spend them on any skin you like.</small></div>');
     h += T('<h3 class="pt">Negozio</h3><div class="skins"><button class="skin', '<h3 class="pt">Shop</h3><div class="skins"><button class="skin') + (activeSkin().id === 'base' ? ' on' : '') + '" type="button" data-a="skin" data-id="base"><span class="sw" style="--a:' + C.snake + ';--b:' + C['snake-head'] + T('"></span><b>Classico</b><small>', '"></span><b>Classic</b><small>') + (activeSkin().id === 'base' ? T('In uso', 'Equipped') : T('Tocca per usarla', 'Tap to use it')) + '</small></button>';
+    if (canReward()) h += '<div class="savebtns"><button class="chip pri" type="button" data-a="adgems">' + T('📺 Guarda un video: +', '📺 Watch a video: +') + ADS.GEMS + ' 💎</button></div>';
     shopList().forEach(function (s) { h += skinCard(s); });
     h += T('</div><h3 class="pt">Con le imprese</h3><div class="skins">', '</div><h3 class="pt">From achievements</h3><div class="skins">');
     SKINS.forEach(function (s) { if (!s.price && s.id !== 'base') h += skinCard(s); });
@@ -1230,7 +1239,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       T('<p class="pnote">La posizione in classifica resta legata a questo telefono: sull’altro il tuo record viene reinviato a fine partita.</p>', '<p class="pnote">Your leaderboard entry stays tied to this phone: on the other one your best score is sent again after a game.</p>') +
       '<h3 class="pt">' + T('I tuoi dati', 'Your data') + '</h3>' +
       '<p class="pnote">' + T('Cancella il nickname e i punteggi dalla classifica online e tutti i progressi da questo telefono (gemme, skin, record). Non si può annullare: se vuoi, prima esporta il salvataggio.', 'Deletes your nickname and scores from the online leaderboard and all progress on this phone (gems, skins, records). This cannot be undone: export your save first if you want to keep it.') + '</p>' +
-      '<div class="savebtns"><button class="chip warn" type="button" data-a="delme">' + T('Elimina i miei dati', 'Delete my data') + '</button></div>' +
+      '<div class="savebtns"><button class="chip warn" type="button" data-a="delme">' + T('Elimina i miei dati', 'Delete my data') + '</button>' +
+      (ADS.privacy ? '<button class="chip" type="button" data-a="adprivacy">' + T('Privacy degli annunci', 'Ad privacy') + '</button>' : '') + '</div>' +
       '<p class="pnote"><a href="privacy.html" target="_blank" rel="noopener">' + T('Informativa privacy', 'Privacy policy') + '</a></p></div>';
   }
   function openPanel(kind) {
@@ -1262,6 +1272,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     else if (a === 'imppaste') { var tx = document.getElementById('impTxt'); offerImport(tx ? tx.value.trim() : ''); }
     else if (a === 'impno') { impPending = null; saveNote(''); }
     else if (a === 'impok') { if (impPending && !applySave(impPending.data)) saveNote(T('Non riesco a scrivere i dati su questo dispositivo.', 'Can’t write data on this device.')); }
+    else if (a === 'adgems') showReward();
+    else if (a === 'adprivacy') { if (AdMob) AdMob.showPrivacyOptionsForm().catch(function () {}); }
     else if (a === 'delme') {
       if (!delArm) { delArm = true; b.textContent = T('Tocca ancora: cancello tutto', 'Tap again: delete everything'); return; }
       delArm = false; b.disabled = true; deleteMyData();
@@ -1423,6 +1435,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   }
 
   function start() {
+    if (maybeInter(start)) return;
     audio();
     closePanel();
     snapOk = SKINS.map(skinOk);
@@ -1491,6 +1504,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 
   function gameOver(didWin, reason) {
     state = 'over';
+    ADS.games++;
     won = !!didWin;
     endReason = reason || '';
     crashed = !didWin && endReason !== 'time';
@@ -1772,6 +1786,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     modeDesc.textContent = modeOf(mode).desc;
     overlay.hidden = state === 'running';
     overlay.style.touchAction = overlay.scrollHeight > overlay.clientHeight + 2 ? 'pan-y' : 'none';
+    adBtn.hidden = !(state === 'over' && canReward());
+    adBtn.textContent = T('📺 Guarda un video: +', '📺 Watch a video: +') + ADS.GEMS + ' 💎';
     playBtn.textContent = state === 'paused' ? T('Riprendi', 'Resume') : (state === 'over' ? T('Rigioca', 'Play again') : T('Gioca', 'Play'));
     if (state === 'ready') {
       ovTitle.textContent = T('Pronto?', 'Ready?');
@@ -2287,6 +2303,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     refreshUI();
   });
   playBtn.addEventListener('click', function () { primary(); });
+  adBtn.addEventListener('click', function () { showReward(); });
   volBtn.addEventListener('click', function () {
     mvol = (mvol + 1) % MUSIC_LEVELS.length;
     lsSet('snake.mvol', String(mvol));
@@ -2374,6 +2391,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       addMonster: function (x, y) { monsters.push({ x: x, y: y, px: x, py: y, born: gt - 2000 }); },
       setPower: function (ms) { powerUntil = gt + ms; },
       fx: function () { return { parts: particles.length, rings: fxRings.length, level: fxLevel }; },
+      ads: function () { return ADS; },
+      obsList: function () { return obstacles.map(function (o) { return [o.x, o.y]; }); },
       stepMonsters: function () { monstersStep(); },
       stats: function () { return JSON.parse(JSON.stringify(stats)); },
       wallet: function () { return JSON.parse(JSON.stringify(wallet)); },
@@ -2415,6 +2434,47 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   if (lsGet('snake.delpending', '') === '1' && FIREBASE_CONFIG) deleteOnline().then(function () { try { localStorage.removeItem('snake.delpending'); } catch (e) {} }, function () {});
   if (FIREBASE_CONFIG && lsGet('snake.nickok', '0') !== '1') showWelcome(); else loginCheck();
   document.addEventListener('visibilitychange', function () { if (!document.hidden && welcomeEl.hidden) { loginCheck(); refreshUI(); } });
+  /* ---------- App Android: pubblicità AdMob (solo nell'app, mai sul sito) ---------- */
+  function adCount() { var o = lsJson('snake.adr', {}); return o.d === todayKey() ? (Number(o.n) || 0) : 0; }
+  function canReward() { return !!(ADS.on && ADS.rewardOk && adCount() < ADS.PER_DAY); }
+  function loadInter() { if (!ADS.on) return; AdMob.prepareInterstitial({ adId: ADS.inter }).then(function () { ADS.interOk = true; }, function () { setTimeout(loadInter, 60000); }); }
+  function loadReward() { if (!ADS.on) return; AdMob.prepareRewardVideoAd({ adId: ADS.reward }).then(function () { ADS.rewardOk = true; refreshUI(); }, function () { setTimeout(loadReward, 60000); }); }
+  function adDone() { var f = ADS.after; ADS.after = null; if (f) f(); }
+  function startAds() {
+    if (!AdMob) return;
+    AdMob.addListener('onRewardedVideoAdReward', function () {
+      lsSet('snake.adr', JSON.stringify({ d: todayKey(), n: adCount() + 1 }));
+      addGems(ADS.GEMS);
+      notify({ icon: '🎁', title: T('+' + ADS.GEMS + ' gemme!', '+' + ADS.GEMS + ' gems!'), text: T('Grazie per aver guardato il video. Ora hai ', 'Thanks for watching. You now have ') + wallet.gems + ' 💎.', actions: [] });
+      if (panelKind === 'skin') openPanel('skin');
+    });
+    AdMob.addListener('onRewardedVideoAdDismissed', function () { loadReward(); refreshUI(); });
+    AdMob.addListener('onRewardedVideoAdFailedToShow', function () { loadReward(); refreshUI(); });
+    AdMob.addListener('interstitialAdDismissed', adDone);
+    AdMob.addListener('interstitialAdFailedToShow', adDone);
+    // prima il consenso (GDPR), poi gli annunci
+    AdMob.requestConsentInfo().then(function (info) {
+      return info.isConsentFormAvailable && info.status === 'REQUIRED' ? AdMob.showConsentForm() : info;
+    }).then(function (info) {
+      ADS.privacy = info.privacyOptionsRequirementStatus === 'REQUIRED';
+      if (!info.canRequestAds) return;
+      return AdMob.initialize({}).then(function () { ADS.on = true; loadInter(); loadReward(); refreshUI(); });
+    }).catch(function () {});
+  }
+  function showReward() {
+    if (!canReward()) return;
+    ADS.rewardOk = false; refreshUI();
+    AdMob.showRewardVideoAd().catch(function () { loadReward(); });
+  }
+  // Annuncio a schermo intero tra una partita e l'altra: ogni 3 partite e non più di uno ogni 2 minuti
+  function maybeInter(then) {
+    if (!(ADS.on && ADS.interOk && ADS.games >= ADS.EVERY && Date.now() - ADS.lastInter > ADS.GAP)) return false;
+    ADS.games = 0; ADS.lastInter = Date.now(); ADS.interOk = false;
+    ADS.after = function () { loadInter(); then(); };
+    AdMob.showInterstitial().catch(adDone);
+    return true;
+  }
+
   // Tasto Indietro di Android (lo chiama il guscio dell'app): true se il gioco l'ha usato, false se l'app può uscire
   window.__snakeBack = function () {
     if (!welcomeEl.hidden) return false;
@@ -2426,11 +2486,16 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   // per l'avviso di aggiornamento: partita in corso? e notifiche del gioco
   window.__snakeBusy = function () { return state === 'running' || state === 'paused'; };
   window.__snakeNotify = notify;
+  if (NATIVE) {
+    startAds();
+    var CapApp = window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+    if (CapApp) CapApp.addListener('backButton', function () { if (!window.__snakeBack()) CapApp.minimizeApp(); });
+  }
   requestAnimationFrame(frame);
 })();
 </script>
 <script>
-if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol) && !(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())) {
   // Aggiornamenti: quando una nuova versione è pronta lo dice, e ricarica solo fuori dalla partita
   (function () {
     var EN = !/^it\b/i.test((navigator.languages && navigator.languages[0]) || navigator.language || 'it');

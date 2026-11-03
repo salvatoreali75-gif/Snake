@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Snake Gems</string>
+    <string name="title_activity_main">Snake Gems</string>
+    <string name="package_name">io.github.salvatoreali75.snakegems</string>
+    <string name="custom_url_scheme">io.github.salvatoreali75.snakegems</string>
+    <!-- ID applicazione AdMob di PROVA: sostituire con quello del tuo account prima della pubblicazione -->
+    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
+</resources>

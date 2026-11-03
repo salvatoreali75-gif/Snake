@@ -1,0 +1,30 @@
+# Costruisce l'app Android di Snake Gems nel cloud di GitHub.
+# Avvio manuale: GitHub → Actions → "App Android" → Run workflow. Il file APK si scarica da "Artifacts".
+name: App Android
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: android-actions/setup-android@v3
+      - name: Gioco web → progetto Android
+        run: |
+          npm ci
+          npm run sync
+      - name: APK di prova (da installare sul telefono)
+        working-directory: android
+        run: ./gradlew --no-daemon assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snake-gems-apk-prova
+          path: android/app/build/outputs/apk/debug/*.apk
