@@ -118,13 +118,15 @@ Free, with ads. You can watch an optional video to earn extra gems.
 - **Dati crittografati in transito:** sì.
 - **Cancellazione dei dati:** sì. Nell'app con *Salvataggio → Elimina i miei dati*; sul web con l'indirizzo della pagina privacy (sezione «Cancellare i tuoi dati»).
 
+**Email di contatto:** `soterkosmos@gmail.com`
+
 **Informativa privacy (URL):** la pagina `privacy.html` pubblicata con il gioco, per esempio `https://salvatoreali75-gif.github.io/Snake/privacy.html` se GitHub Pages è attivo su Snake. Va controllato.
 
 ---
 
 ## Da fare prima di pubblicare
 
-1. **Email di contatto:** creala e sostituisci `[EMAIL DI CONTATTO DA INSERIRE]` e `[CONTACT EMAIL TO BE ADDED]` in `privacy.html`.
+1. **Email di contatto:** `soterkosmos@gmail.com`, già inserita in `privacy.html`. Usala anche come email dello sviluppatore nella Play Console.
 2. **AdMob:** crea l'app nel tuo account AdMob e due unità pubblicitarie (Interstitial e Rewarded). Poi sostituisci gli ID di prova:
    - in `android/app/src/main/res/values/strings.xml` → `admob_app_id`;
    - in `index.html` → `ADS.inter` e `ADS.reward`.
