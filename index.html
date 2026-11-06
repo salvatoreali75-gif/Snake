@@ -1950,7 +1950,14 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     }
     var pk = Math.max(0, 1 - (t - punchAt) / 140), ps = 1 + 0.04 * pk * pk;
     ctx.setTransform(dpr * ps, 0, 0, dpr * ps, (sx + BW / 2 * (1 - ps)) * dpr, (sy + BH / 2 * (1 - ps)) * dpr);
-    ctx.drawImage(gridCv, 0, 0, BW, BH);          // sfondo e punti già pronti (nessun ridisegno)
+    // Sfondo pieno su tutta la tela, sempre: se il sistema svuota la griglia preparata (succede quando l'app
+    // torna dallo sfondo) il serpente e le esplosioni non si accumulano più lasciando strisce e "stelle".
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = C.board;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+    ctx.drawImage(gridCv, 0, 0, BW, BH);          // punti già pronti (nessun ridisegno)
 
     // ostacoli
     ctx.fillStyle = C.obst;
@@ -2374,7 +2381,11 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) pause();
+    else { lastFrame = 0; resize(); }   // al ritorno: misure e griglia rifatte da zero
   });
+  window.addEventListener('pageshow', function () { lastFrame = 0; resize(); });
+  window.addEventListener('focus', function () { resize(); });
+  canvas.addEventListener('contextrestored', function () { resize(); });
   window.addEventListener('resize', resize);
   window.addEventListener('orientationchange', resize);
   if (window.ResizeObserver) new ResizeObserver(resize).observe($('stage'));
