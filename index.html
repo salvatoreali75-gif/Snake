@@ -285,6 +285,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 .nick input { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--btn); color: var(--ink); -webkit-user-select: text; user-select: text; }
 .pnote { margin: 0; font-size: 0.78rem; color: var(--muted); }
 .pnote a, .wbox a { color: var(--snake); font-weight: 700; }
+.btn.exitbtn { color: var(--danger); border-color: var(--danger); }
 .btn.adbtn { border-color: var(--bonus); color: var(--bonus); font-weight: 800; }
 .lbrow .rep { flex: none; font: inherit; font-size: 0.75rem; border: 0; background: none; color: var(--muted); padding: 2px 6px; cursor: pointer; }
 .lbrow .rep.arm { color: var(--danger); font-weight: 800; }
@@ -358,6 +359,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
           <p class="ov-sub" id="ovSub">Tocca lo schermo per iniziare</p>
           <button class="btn play" id="playBtn" type="button">Gioca</button>
           <button class="btn adbtn" id="adBtn" type="button" hidden></button>
+          <button class="btn exitbtn" id="exitBtn" type="button" hidden data-en="Exit">Esci</button>
           <div class="seg" id="modeSeg"></div>
           <p class="mdesc" id="modeDesc"></p>
           <div class="ov-tools">
@@ -1243,11 +1245,22 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       (ADS.privacy ? '<button class="chip" type="button" data-a="adprivacy">' + T('Privacy degli annunci', 'Ad privacy') + '</button>' : '') + '</div>' +
       '<p class="pnote"><a href="privacy.html" target="_blank" rel="noopener">' + T('Informativa privacy', 'Privacy policy') + '</a></p></div>';
   }
+  function exitPanel() {
+    return panelHead(T('Uscire?', 'Exit?')) + '<div class="pb">' +
+      '<p class="pnote">' + (state === 'paused' ? T('Sei sicuro di voler uscire dal gioco? La partita in corso andrà persa.', 'Are you sure you want to exit the game? The current game will be lost.') : T('Sei sicuro di voler uscire dal gioco?', 'Are you sure you want to exit the game?')) + '</p>' +
+      '<div class="savebtns"><button class="chip warn" type="button" data-a="exitok">' + T('Sì, esci', 'Yes, exit') + '</button><button class="chip pri" type="button" data-a="close">' + T('No, resta', 'No, stay') + '</button></div></div>';
+  }
+  function doExit() {
+    var CA = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+    if (NATIVE && CA && CA.exitApp) { CA.exitApp(); return; }
+    try { window.close(); } catch (e) {}
+    closePanel(); reset();               // sul sito la scheda non si chiude da sola: si torna al menu
+  }
   function openPanel(kind) {
     panelKind = kind;
     impPending = null;
     delArm = false;
-    panel.innerHTML = kind === 'skin' ? skinPanel() : (kind === 'mis' ? misPanel() : (kind === 'save' ? savePanel() : lbPanel()));
+    panel.innerHTML = kind === 'skin' ? skinPanel() : (kind === 'mis' ? misPanel() : (kind === 'save' ? savePanel() : (kind === 'exit' ? exitPanel() : lbPanel())));
     panel.hidden = false;
     if (kind === 'lb') fillLb();
   }
@@ -1257,6 +1270,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     if (!b) return;
     var a = b.getAttribute('data-a'), id = b.getAttribute('data-id');
     if (a === 'close') closePanel();
+    else if (a === 'exitok') doExit();
     else if (a === 'skin') {
       var s = skinById(id);
       if (skinOk(s)) { skinId = id; lsSet('snake.skin', id); buyArm = ''; openPanel('skin'); }
@@ -1787,6 +1801,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     overlay.hidden = state === 'running';
     overlay.style.touchAction = overlay.scrollHeight > overlay.clientHeight + 2 ? 'pan-y' : 'none';
     adBtn.hidden = !(state === 'over' && canReward());
+    $('exitBtn').hidden = !(state === 'paused' || state === 'over');
     adBtn.textContent = T('📺 Guarda un video: +', '📺 Watch a video: +') + ADS.GEMS + ' 💎';
     playBtn.textContent = state === 'paused' ? T('Riprendi', 'Resume') : (state === 'over' ? T('Rigioca', 'Play again') : T('Gioca', 'Play'));
     if (state === 'ready') {
@@ -2365,6 +2380,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   misBtn.addEventListener('click', function () { openPanel('mis'); });
   lbBtn.addEventListener('click', function () { lbMode = mode; openPanel('lb'); });
   $('saveBtn').addEventListener('click', function () { openPanel('save'); });
+  $('exitBtn').addEventListener('click', function () { openPanel('exit'); });
   (function buildModes() {
     modeSeg.innerHTML = MODES.map(function (m) { return '<button class="chip" type="button" data-mode="' + m.id + '">' + m.name + '</button>'; }).join('');
     modeSeg.addEventListener('click', function (e) {
@@ -2516,6 +2532,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     if (notifCur) { closeNotif(notifCur); return true; }
     if (!panel.hidden) { closePanel(); return true; }
     if (state === 'running') { pause(); return true; }
+    if (state === 'paused' || state === 'over') { openPanel('exit'); return true; }
     return false;
   };
   // per l'avviso di aggiornamento: partita in corso? e notifiche del gioco
