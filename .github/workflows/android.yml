@@ -3,6 +3,11 @@
 name: App Android
 on:
   workflow_dispatch:
+    inputs:
+      live:
+        description: "App collegata al sito: il gioco si aggiorna da solo (true) oppure copia interna, per lo Store (false)"
+        type: boolean
+        default: true
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,6 +24,11 @@ jobs:
       # L'SDK Android è già installato sul server di GitHub: il vecchio passaggio "setup-android" ora si blocca
       - name: Accetta le licenze dell'SDK Android
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+      - name: App collegata al sito (aggiornamenti automatici)
+        if: ${{ inputs.live }}
+        run: |
+          node -e "const f='capacitor.config.json';const c=JSON.parse(require('fs').readFileSync(f));c.server={url:'https://salvatoreali75-gif.github.io/Snake/',androidScheme:'https'};require('fs').writeFileSync(f,JSON.stringify(c,null,2));"
+          cat capacitor.config.json
       - name: Gioco web → progetto Android
         run: |
           npm ci

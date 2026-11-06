@@ -2581,7 +2581,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 })();
 </script>
 <script>
-if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol) && !(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())) {
+if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol) && !(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() && location.hostname === "localhost")) {
   // Aggiornamenti: quando una nuova versione è pronta lo dice, e ricarica solo fuori dalla partita
   (function () {
     var EN = !/^it\b/i.test((navigator.languages && navigator.languages[0]) || navigator.language || 'it');

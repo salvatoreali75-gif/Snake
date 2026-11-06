@@ -1,5 +1,5 @@
 // Unica costante da cambiare a ogni rilascio: rinomina la cache e fa comparire l'avviso "Nuova versione"
-var VERSION = "16";
+var VERSION = "17";
 var CACHE = "snake-v" + VERSION;
 var CORE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png", "privacy.html"];
 self.addEventListener("install", function (e) {
