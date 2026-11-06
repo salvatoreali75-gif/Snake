@@ -266,8 +266,10 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
 .skin.lock { opacity: 0.6; cursor: default; }
 .skin b { font-size: 0.9rem; }
 .skin small { font-size: 0.72rem; color: var(--muted); line-height: 1.25; }
-.sw { display: block; position: relative; height: 18px; margin-right: 14px; border-radius: 9px; background: var(--a); }
-.sw::after { content: ""; position: absolute; right: -14px; top: -3px; width: 24px; height: 24px; border-radius: 50%; background: var(--b); }
+.sw { display: block; position: relative; height: 22px; margin: 4px 18px 4px 2px; border-radius: 11px; background: var(--a); border: 2px solid var(--o, #1c2c3a); box-sizing: border-box; }
+.sw::after { content: ""; position: absolute; right: -19px; top: -7px; width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--o, #1c2c3a); box-sizing: border-box;
+  background: radial-gradient(circle at 72% 30%, #1A1210 0 1.6px, transparent 2px), radial-gradient(circle at 72% 70%, #1A1210 0 1.6px, transparent 2px),
+    radial-gradient(circle at 68% 30%, #fff 0 3.4px, transparent 3.8px), radial-gradient(circle at 68% 70%, #fff 0 3.4px, transparent 3.8px), var(--b); }
 .sw.rb { background: linear-gradient(90deg, #ff5e5e, #ffb347, #ffe94d, #4fd08f, #4fc3f7, #b292ff); }
 .mis { padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--btn); display: flex; flex-direction: column; gap: 6px; }
 .mis.done { border-color: var(--snake); }
@@ -621,6 +623,15 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     if (s.price) return !!(wallet.owned && wallet.owned[s.id]);
     return !s.need || statVal(s.need.k) >= s.need.n;
   }
+  // Colore del contorno: il colore del corpo scurito (così ogni skin resta ben staccata dallo sfondo)
+  function shade(hex, k) {
+    var h = String(hex).trim().replace('#', '');
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    var n = parseInt(h, 16);
+    if (isNaN(n) || h.length !== 6) return 'rgba(20,35,47,0.7)';
+    return 'rgb(' + Math.round((n >> 16) * k) + ',' + Math.round(((n >> 8) & 255) * k) + ',' + Math.round((n & 255) * k) + ')';
+  }
+  function skinOutline(s, cols) { return s && s.rainbow ? 'rgba(45,25,75,0.6)' : shade(cols ? cols[0] : C.snake, isDark() ? 0.35 : 0.55); }
   function skinCols(s) { return s.light ? (isDark() ? s.dark : s.light) : null; }
   function activeSkin() { var s = skinById(skinId); return skinOk(s) ? s : SKINS[0]; }
 
@@ -1096,12 +1107,12 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     } else if (!ok) { cls = ' lock'; dis = ' disabled'; sub = s.need.t + ' (' + Math.min(statVal(s.need.k), s.need.n) + T(' su ', ' of ') + s.need.n + ')'; }
     else sub = cur ? T('In uso', 'Equipped') : T('Tocca per usarla', 'Tap to use it');
     return '<button class="skin' + (cur ? ' on' : '') + cls + '" type="button" data-a="skin" data-id="' + s.id + '"' + dis + '>' +
-      '<span class="sw' + (s.rainbow ? ' rb' : '') + '" style="--a:' + cols[0] + ';--b:' + (s.rainbow ? '#b292ff' : cols[1]) + (s.gl ? ';background:linear-gradient(90deg,' + skinGrad(s).join(',') + ')' : '') + '"></span>' +
+      '<span class="sw' + (s.rainbow ? ' rb' : '') + '" style="--a:' + cols[0] + ';--o:' + skinOutline(s, skinCols(s)) + (s.glow ? ';box-shadow:0 0 9px ' + s.glow : '') + ';--b:' + (s.rainbow ? '#b292ff' : cols[1]) + (s.gl ? ';background:linear-gradient(90deg,' + skinGrad(s).join(',') + ')' : '') + '"></span>' +
       '<b>' + escH(s.name) + '</b><small>' + sub + '</small></button>';
   }
   function skinPanel() {
     var h = panelHead(T('Skin', 'Skins')) + '<div class="pb"><div class="gemrow"><span>💎 <b>' + wallet.gems + T('</b> gemme</span><small>Le guadagni giocando, con le missioni e ogni giorno. Le spendi tu, sulla skin che vuoi.</small></div>', '</b> gems</span><small>Earn them by playing, with missions and every day. Spend them on any skin you like.</small></div>');
-    h += T('<h3 class="pt">Negozio</h3><div class="skins"><button class="skin', '<h3 class="pt">Shop</h3><div class="skins"><button class="skin') + (activeSkin().id === 'base' ? ' on' : '') + '" type="button" data-a="skin" data-id="base"><span class="sw" style="--a:' + C.snake + ';--b:' + C['snake-head'] + T('"></span><b>Classico</b><small>', '"></span><b>Classic</b><small>') + (activeSkin().id === 'base' ? T('In uso', 'Equipped') : T('Tocca per usarla', 'Tap to use it')) + '</small></button>';
+    h += T('<h3 class="pt">Negozio</h3><div class="skins"><button class="skin', '<h3 class="pt">Shop</h3><div class="skins"><button class="skin') + (activeSkin().id === 'base' ? ' on' : '') + '" type="button" data-a="skin" data-id="base"><span class="sw" style="--a:' + C.snake + ';--o:' + skinOutline(null, null) + ';--b:' + C['snake-head'] + T('"></span><b>Classico</b><small>', '"></span><b>Classic</b><small>') + (activeSkin().id === 'base' ? T('In uso', 'Equipped') : T('Tocca per usarla', 'Tap to use it')) + '</small></button>';
     if (canReward()) h += '<div class="savebtns"><button class="chip pri" type="button" data-a="adgems">' + T('📺 Guarda un video: +', '📺 Watch a video: +') + ADS.GEMS + ' 💎</button></div>';
     shopList().forEach(function (s) { h += skinCard(s); });
     h += T('</div><h3 class="pt">Con le imprese</h3><div class="skins">', '</div><h3 class="pt">From achievements</h3><div class="skins">');
@@ -2062,6 +2073,10 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       for (var gj = 0; gj < cs.length; gj++) gr2.addColorStop(gj / (cs.length - 1), cs[gj]);
       bodyCol = gr2;
     }
+    var outC = skinOutline(sk, scol);
+    ctx.strokeStyle = outC; ctx.lineWidth = c * 0.7 + Math.max(2, c * 0.15);
+    for (j = 0; j < runs.length; j++) strokeRun(runs[j]);
+    ctx.lineWidth = c * 0.7;
     ctx.strokeStyle = bodyCol;
     if (sk.glow) { ctx.shadowColor = sk.glow; ctx.shadowBlur = c * 0.9; }
     for (j = 0; j < runs.length; j++) strokeRun(runs[j]);
@@ -2079,6 +2094,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     ctx.beginPath();
     ctx.arc(hp.x, hp.y, c * 0.42, 0, Math.PI * 2);
     ctx.fill();
+    ctx.strokeStyle = outC; ctx.lineWidth = Math.max(1, c * 0.075); ctx.stroke();
     var px = -fdy, py = fdx;
     for (var k = -1; k <= 1; k += 2) {
       var ex = hp.x + fdx * c * 0.14 + px * k * c * 0.17;
