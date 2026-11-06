@@ -2558,6 +2558,7 @@ if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol) && !(win
       if (!w || !hadCtrl || asked) return;
       waiting = w; asked = true;
       if (window.__snakeNotify) window.__snakeNotify({ icon: "✨", title: EN ? "New version available" : "Nuova versione disponibile", text: EN ? "Tap “Update now”, or it will update by itself after your next game." : "Tocca «Aggiorna ora», oppure si aggiorna da sola alla fine della prossima partita.", actions: [{ label: EN ? "Update now" : "Aggiorna ora", pri: true, fn: activate }] });
+      if (!busy()) { setTimeout(activate, 1500); return; }   // non si sta giocando: si aggiorna subito, da sola
       var was = busy();
       setInterval(function () { var b = busy(); if (was && !b) activate(); was = b; }, 1000);
     }
