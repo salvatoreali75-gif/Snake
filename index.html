@@ -361,6 +361,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
           <p class="ov-sub" id="ovSub">Tocca lo schermo per iniziare</p>
           <button class="btn play" id="playBtn" type="button">Gioca</button>
           <button class="btn adbtn" id="adBtn" type="button" hidden></button>
+          <button class="btn" id="menuBtn" type="button" hidden data-en="Back to menu">Torna al menu</button>
           <button class="btn exitbtn" id="exitBtn" type="button" hidden data-en="Exit">Esci</button>
           <div class="seg" id="modeSeg"></div>
           <p class="mdesc" id="modeDesc"></p>
@@ -1261,6 +1262,17 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
       '<p class="pnote">' + (state === 'paused' ? T('Sei sicuro di voler uscire dal gioco? La partita in corso andrà persa.', 'Are you sure you want to exit the game? The current game will be lost.') : T('Sei sicuro di voler uscire dal gioco?', 'Are you sure you want to exit the game?')) + '</p>' +
       '<div class="savebtns"><button class="chip warn" type="button" data-a="exitok">' + T('Sì, esci', 'Yes, exit') + '</button><button class="chip pri" type="button" data-a="close">' + T('No, resta', 'No, stay') + '</button></div></div>';
   }
+  var pendMode = '';
+  function confirmPanel(title, text, yesLabel, yesAct) {
+    return panelHead(title) + '<div class="pb"><p class="pnote">' + text + '</p>' +
+      '<div class="savebtns"><button class="chip warn" type="button" data-a="' + yesAct + '">' + yesLabel + '</button><button class="chip pri" type="button" data-a="close">' + T('No, resta', 'No, stay') + '</button></div></div>';
+  }
+  function modePanel() {
+    return confirmPanel(T('Cambiare modalità?', 'Change mode?'), T('Passi a «', 'Switch to “') + modeOf(pendMode).name + T('» e la partita in corso andrà persa.', '” and the current game will be lost.'), T('Sì, cambia', 'Yes, change'), 'modeok');
+  }
+  function menuPanel() {
+    return confirmPanel(T('Tornare al menu?', 'Back to menu?'), T('La partita in corso andrà persa.', 'The current game will be lost.'), T('Sì, torna al menu', 'Yes, back to menu'), 'menuok');
+  }
   function doExit() {
     var CA = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
     if (NATIVE && CA && CA.exitApp) { CA.exitApp(); return; }
@@ -1271,7 +1283,7 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     panelKind = kind;
     impPending = null;
     delArm = false;
-    panel.innerHTML = kind === 'skin' ? skinPanel() : (kind === 'mis' ? misPanel() : (kind === 'save' ? savePanel() : (kind === 'exit' ? exitPanel() : lbPanel())));
+    panel.innerHTML = kind === 'skin' ? skinPanel() : (kind === 'mis' ? misPanel() : (kind === 'save' ? savePanel() : (kind === 'exit' ? exitPanel() : (kind === 'mode' ? modePanel() : (kind === 'menu' ? menuPanel() : lbPanel())))));
     panel.hidden = false;
     if (kind === 'lb') fillLb();
   }
@@ -1282,6 +1294,8 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     var a = b.getAttribute('data-a'), id = b.getAttribute('data-id');
     if (a === 'close') closePanel();
     else if (a === 'exitok') doExit();
+    else if (a === 'modeok') { mode = pendMode; lsSet('snake.mode', mode); closePanel(); reset(); }
+    else if (a === 'menuok') { closePanel(); reset(); }
     else if (a === 'skin') {
       var s = skinById(id);
       if (skinOk(s)) { skinId = id; lsSet('snake.skin', id); buyArm = ''; openPanel('skin'); }
@@ -1806,13 +1820,14 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
     each4(modeSeg.children, function (b) {
       var on = b.getAttribute('data-mode') === mode;
       b.classList.toggle('on', on);
-      b.disabled = !idle;
+      b.disabled = !idle && state !== 'paused';   // in pausa si può cambiare modalità (con conferma)
     });
     modeDesc.textContent = modeOf(mode).desc;
     overlay.hidden = state === 'running';
     overlay.style.touchAction = overlay.scrollHeight > overlay.clientHeight + 2 ? 'pan-y' : 'none';
     adBtn.hidden = !(state === 'over' && canReward());
     $('exitBtn').hidden = !(state === 'paused' || state === 'over');
+    $('menuBtn').hidden = state !== 'paused';
     adBtn.textContent = T('📺 Guarda un video: +', '📺 Watch a video: +') + ADS.GEMS + ' 💎';
     playBtn.textContent = state === 'paused' ? T('Riprendi', 'Resume') : (state === 'over' ? T('Rigioca', 'Play again') : T('Gioca', 'Play'));
     if (state === 'ready') {
@@ -2397,12 +2412,15 @@ button:focus-visible { outline: 2px solid var(--snake); outline-offset: 2px; }
   lbBtn.addEventListener('click', function () { lbMode = mode; openPanel('lb'); });
   $('saveBtn').addEventListener('click', function () { openPanel('save'); });
   $('exitBtn').addEventListener('click', function () { openPanel('exit'); });
+  $('menuBtn').addEventListener('click', function () { openPanel('menu'); });
   (function buildModes() {
     modeSeg.innerHTML = MODES.map(function (m) { return '<button class="chip" type="button" data-mode="' + m.id + '">' + m.name + '</button>'; }).join('');
     modeSeg.addEventListener('click', function (e) {
       var b = e.target.closest ? e.target.closest('[data-mode]') : null;
       if (!b || b.disabled) return;
-      mode = b.getAttribute('data-mode');
+      var nm = b.getAttribute('data-mode');
+      if (state === 'paused') { if (nm !== mode) { pendMode = nm; openPanel('mode'); } return; }
+      mode = nm;
       lsSet('snake.mode', mode);
       reset();
     });
